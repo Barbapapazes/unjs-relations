@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: true,
-      routes: ['/'],
+      routes: ['/', '/api/packages'],
     },
     routeRules: {
       '/api/packages': {
