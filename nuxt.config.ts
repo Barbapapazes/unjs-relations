@@ -3,6 +3,10 @@ export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
   modules: ['@nuxt/ui'],
   nitro: {
+    prerender: {
+      crawlLinks: true,
+      routes: ['/'],
+    },
     routeRules: {
       '/api/packages': {
         cache: {
