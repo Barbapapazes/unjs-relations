@@ -1,22 +1,20 @@
 <script lang="ts" setup>
 import type { Data, Edge, Options } from 'vis-network'
 import { Network } from 'vis-network'
+import type { Package } from '~/types/packages'
 
 const props = defineProps<{
-  packages: {
-    name: string
-    dependencies: string[]
-    devDependencies: string[]
-  }[]
+  packages: Package[]
   selection: string[]
   showDependencies: boolean
   showDevDependencies: boolean
-  showUsedBy: boolean
+  showChilds: boolean
 }>()
 
 const container = ref<HTMLElement>()
 
 const data = computed<Data>(() => {
+  /** Selection */
   const selectionNodes: Data['nodes'] = props.selection.map((select) => {
     return {
       id: select,
@@ -25,54 +23,60 @@ const data = computed<Data>(() => {
     }
   })
 
-  const packagesUsedBySelection = props.packages
-  // Only get parents of selected packages
-    .filter((pkg) => {
-      if (!props.showUsedBy)
-        return false
-
-      if (props.showDependencies) {
-      // Check if current package use any of the selected packages
-        const hasUsedBy = pkg.dependencies.some((dep) => {
-          return props.selection.includes(dep)
-        })
-
-        if (hasUsedBy)
-          return true
-      }
-
-      if (props.showDevDependencies) {
-      // Check if current package use any of the selected packages
-        const hasUsedBy = pkg.devDependencies.some((dep) => {
-          return props.selection.includes(dep)
-        })
-
-        if (hasUsedBy)
-          return true
-      }
-
-      return false
-    })
-  // Remove dependencies and devDependencies that are not selected
-    .map((pkg) => {
-      return {
-        ...pkg,
-        dependencies: pkg.dependencies.filter((dep) => {
-          return props.selection.includes(dep)
-        }),
-        devDependencies: pkg.devDependencies.filter((dep) => {
-          return props.selection.includes(dep)
-        }),
-      }
-    })
-
-  // Find all related packages
-  const relatedPackages = props.packages.filter((pkg) => {
+  const selectionPackages = props.packages.filter((pkg) => {
     return props.selection.includes(pkg.name)
   })
 
-  // Find all dependencies of related packages
-  const allDeps = relatedPackages.flatMap((pkg) => {
+  // Use a condition to avoid unnecessary computation
+  const selectionChildsPackages: Package[] = []
+  const selectionChildsPackagesName: string[] = []
+  if (props.showChilds) {
+  /** Childs */
+    selectionChildsPackages.push(...props.packages
+    // Filter out packages that have not selected packages as dependencies or devDependencies
+      .filter((pkg) => {
+        if (props.showDependencies) {
+          // Check if current package use any of the selected packages
+          const hasUsedBy = pkg.dependencies.some((dep) => {
+            return props.selection.includes(dep)
+          })
+
+          if (hasUsedBy)
+            return true
+        }
+
+        if (props.showDevDependencies) {
+          // Check if current package use any of the selected packages
+          const hasUsedBy = pkg.devDependencies.some((dep) => {
+            return props.selection.includes(dep)
+          })
+
+          if (hasUsedBy)
+            return true
+        }
+
+        return false
+      })
+    // Remove dependencies and devDependencies that are not selected
+      .map((pkg) => {
+        return {
+          ...pkg,
+          dependencies: pkg.dependencies.filter((dep) => {
+            return props.selection.includes(dep)
+          }),
+          devDependencies: pkg.devDependencies.filter((dep) => {
+            return props.selection.includes(dep)
+          }),
+        }
+      }))
+
+    selectionChildsPackagesName.push(...selectionChildsPackages.map((pkg) => {
+      return pkg.name
+    }))
+  }
+
+  /** Dependencies and Dev Dependencies */
+  const allDependencies = [...selectionPackages, ...selectionChildsPackages].flatMap((pkg) => {
     const deps = []
 
     if (props.showDependencies)
@@ -84,19 +88,15 @@ const data = computed<Data>(() => {
     return deps
   })
 
-  const parentsPackages = packagesUsedBySelection.map((pkg) => {
-    return pkg.name
-  })
+  // Remove duplicates in all dependencies
+  const dedupedAllDependencies = [...new Set(allDependencies)]
 
-  // Remove duplicates
-  const withoutDuplicatesDeps = new Set([...allDeps, ...parentsPackages])
-
-  // Remove selected packages (already in the graph)
-  const withoutSelection = [...withoutDuplicatesDeps].filter((dep) => {
+  // Remove selected packages from all dependencies since they are already in selection
+  const dedupedWithoutSelectionAllDependencies = dedupedAllDependencies.filter((dep) => {
     return !props.selection.includes(dep)
   })
 
-  const depsNodes: Data['nodes'] = withoutSelection.flatMap((dep) => {
+  const allDependenciesNodes: Data['nodes'] = dedupedWithoutSelectionAllDependencies.flatMap((dep) => {
     return {
       id: dep,
       label: dep,
@@ -106,11 +106,23 @@ const data = computed<Data>(() => {
 
   const nodes: Data['nodes'] = [
     ...selectionNodes,
-    ...depsNodes,
+    ...allDependenciesNodes,
   ]
 
+  // Order matters since we want to show the dependencies and devDependencies of the selected packages first (otherwise, some packages will not have all their dependencies shown)
+  const dedupePackages = [...selectionPackages, ...selectionChildsPackages].reduce((acc, pkg) => {
+    const index = acc.findIndex((p) => {
+      return p.name === pkg.name
+    })
+
+    if (index === -1)
+      acc.push(pkg)
+
+    return acc
+  }, [] as Package[])
+
   const edges: Data['edges'] = [
-    ...[...relatedPackages, ...packagesUsedBySelection].flatMap((pkg) => {
+    ...dedupePackages.flatMap((pkg) => {
       const data: Edge[] = []
 
       if (props.showDependencies) {

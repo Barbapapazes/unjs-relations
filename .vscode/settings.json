@@ -83,5 +83,9 @@
     "json",
     "jsonc",
     "yaml"
+  ],
+  "cSpell.words": [
+    "dedupe",
+    "deduped"
   ]
 }

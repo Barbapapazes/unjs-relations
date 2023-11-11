@@ -1,6 +1,6 @@
 import type { GitHubFile, GitHubRepo } from '../types'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async () => {
   const repos = await $fetch<{ repos: GitHubRepo[] }>('https://ungh.cc/orgs/unjs/repos').then(({ repos }) => repos.filter(repo => !internalRepos.has(repo.name)))
 
   const reposNames = repos.map(repo => repo.name)

@@ -25,7 +25,7 @@ function selectAll() {
 
 const showDependencies = ref<boolean>(true)
 const showDevDependencies = ref<boolean>(true)
-const showUsedBy = ref<boolean>(false)
+const showChilds = ref<boolean>(false)
 </script>
 
 <template>
@@ -44,7 +44,7 @@ const showUsedBy = ref<boolean>(false)
         <UCheckbox v-model="showDependencies" label="Show dependencies" name="dependencies" />
         <UCheckbox v-model="showDevDependencies" label="Show devDependencies" name="devDependencies" />
 
-        <UCheckbox v-model="showUsedBy" label="Show used by" name="usedBy" />
+        <UCheckbox v-model="showChilds" label="Show childs" name="childs" />
 
         <UButton color="red" variant="outline" @click="resetSelection">
           Reset selection
@@ -56,7 +56,7 @@ const showUsedBy = ref<boolean>(false)
 
       <Relations
         :packages="pkg!" :selection="selected"
-        :show-dependencies="showDependencies" :show-dev-dependencies="showDevDependencies" :show-used-by="showUsedBy"
+        :show-dependencies="showDependencies" :show-dev-dependencies="showDevDependencies" :show-childs="showChilds"
       />
     </UPage>
   </UContainer>
