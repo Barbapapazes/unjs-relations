@@ -15,5 +15,13 @@ export default defineNuxtConfig({
       },
     },
   },
+  vite: {
+    optimizeDeps: {
+      include: [
+        'vis-network',
+        'vis-data',
+      ],
+    },
+  },
   devtools: { enabled: true },
 })
