@@ -1,0 +1,27 @@
+{
+  "name": "relations-unjs",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@nuxt/ui-pro": "^0.4.2"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^1.1.1",
+    "@nuxt/devtools": "latest",
+    "eslint": "^8.53.0",
+    "nuxt": "^3.8.1",
+    "vis-data": "^7.1.8",
+    "vis-network": "^9.1.9",
+    "vue": "^3.3.8",
+    "vue-router": "^4.2.5"
+  }
+}
