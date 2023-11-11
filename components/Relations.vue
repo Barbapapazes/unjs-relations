@@ -8,7 +8,7 @@ const props = defineProps<{
   selection: string[]
   showDependencies: boolean
   showDevDependencies: boolean
-  showChilds: boolean
+  showChildren: boolean
 }>()
 
 const container = ref<HTMLElement>()
@@ -28,11 +28,11 @@ const data = computed<Data>(() => {
   })
 
   // Use a condition to avoid unnecessary computation
-  const selectionChildsPackages: Package[] = []
-  const selectionChildsPackagesName: string[] = []
-  if (props.showChilds) {
-  /** Childs */
-    selectionChildsPackages.push(...props.packages
+  const selectionChildrenPackages: Package[] = []
+  const selectionChildrenPackagesName: string[] = []
+  if (props.showChildren) {
+  /** Children */
+    selectionChildrenPackages.push(...props.packages
     // Filter out packages that have not selected packages as dependencies or devDependencies
       .filter((pkg) => {
         if (props.showDependencies) {
@@ -70,13 +70,13 @@ const data = computed<Data>(() => {
         }
       }))
 
-    selectionChildsPackagesName.push(...selectionChildsPackages.map((pkg) => {
+    selectionChildrenPackagesName.push(...selectionChildrenPackages.map((pkg) => {
       return pkg.name
     }))
   }
 
   /** Dependencies and Dev Dependencies */
-  const allDependencies = [...selectionPackages, ...selectionChildsPackages].flatMap((pkg) => {
+  const allDependencies = [...selectionPackages, ...selectionChildrenPackages].flatMap((pkg) => {
     const deps = []
 
     if (props.showDependencies)
@@ -110,7 +110,7 @@ const data = computed<Data>(() => {
   ]
 
   // Order matters since we want to show the dependencies and devDependencies of the selected packages first (otherwise, some packages will not have all their dependencies shown)
-  const dedupePackages = [...selectionPackages, ...selectionChildsPackages].reduce((acc, pkg) => {
+  const dedupePackages = [...selectionPackages, ...selectionChildrenPackages].reduce((acc, pkg) => {
     const index = acc.findIndex((p) => {
       return p.name === pkg.name
     })

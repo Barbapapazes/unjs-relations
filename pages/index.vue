@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const { data: pkg } = await useFetch('/api/packages', { deep: false })
+const { data: pkg } = await useFetch('/api/packages')
 
 if (!pkg.value) {
   throw createError({
@@ -25,7 +25,7 @@ function selectAll() {
 
 const showDependencies = ref<boolean>(true)
 const showDevDependencies = ref<boolean>(true)
-const showChilds = ref<boolean>(false)
+const showChildren = ref<boolean>(false)
 </script>
 
 <template>
@@ -44,7 +44,7 @@ const showChilds = ref<boolean>(false)
         <UCheckbox v-model="showDependencies" label="Show dependencies" name="dependencies" />
         <UCheckbox v-model="showDevDependencies" label="Show devDependencies" name="devDependencies" />
 
-        <UCheckbox v-model="showChilds" label="Show childs" name="childs" />
+        <UCheckbox v-model="showChildren" label="Show children" name="children" />
 
         <UButton color="red" variant="outline" @click="resetSelection">
           Reset selection
@@ -75,7 +75,7 @@ const showChilds = ref<boolean>(false)
 
       <Relations
         :packages="pkg!" :selection="selected"
-        :show-dependencies="showDependencies" :show-dev-dependencies="showDevDependencies" :show-childs="showChilds"
+        :show-dependencies="showDependencies" :show-dev-dependencies="showDevDependencies" :show-children="showChildren"
       />
     </UPage>
   </UContainer>
