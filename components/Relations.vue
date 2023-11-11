@@ -188,11 +188,11 @@ onMounted(() => {
     groups: {
       selection: {
         color: {
-          background: '#F7F1BD', // unjs-300
-          border: '#ECDC5A', // unjs-500
+          background: '#F7F1BD', // yellow-300
+          border: '#ECDC5A', // yellow-500
           highlight: {
-            background: '#F2E78C', // unjs-400
-            border: '#D4C651', // unjs-600
+            background: '#F2E78C', // yellow-400
+            border: '#D4C651', // yellow-600
           },
         },
       },
