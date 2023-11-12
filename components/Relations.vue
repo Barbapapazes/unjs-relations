@@ -79,6 +79,9 @@ const data = computed<Data>(() => {
   const allDependencies = [...selectionPackages, ...selectionChildrenPackages].flatMap((pkg) => {
     const deps = []
 
+    // Add current package for selection children packages
+    deps.push(pkg.name)
+
     if (props.showDependencies)
       deps.push(...pkg.dependencies)
 
