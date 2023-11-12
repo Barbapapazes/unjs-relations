@@ -174,6 +174,13 @@ onMounted(() => {
       shape: 'dot',
       size: 16,
     },
+    edges: {
+      arrows: {
+        to: {
+          scaleFactor: 0.5,
+        },
+      },
+    },
     physics: {
       repulsion: {
         centralGravity: 0.7,
