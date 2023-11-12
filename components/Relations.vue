@@ -19,6 +19,7 @@ const data = computed<Data>(() => {
     return {
       id: select,
       label: select,
+      image: `https://unjs.io/assets/logos/${select}.svg`,
       group: 'selection',
     }
   })
@@ -103,6 +104,7 @@ const data = computed<Data>(() => {
     return {
       id: dep,
       label: dep,
+      image: `https://unjs.io/assets/logos/${dep}.svg`,
       group: 'dependencies',
     }
   })
@@ -171,13 +173,14 @@ const data = computed<Data>(() => {
 onMounted(() => {
   const options: Options = {
     nodes: {
-      shape: 'dot',
+      shape: 'circularImage',
+      imagePadding: 6,
       size: 16,
     },
     edges: {
       arrows: {
         to: {
-          scaleFactor: 0.5,
+          scaleFactor: 0.2,
         },
       },
     },
