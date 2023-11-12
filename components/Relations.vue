@@ -11,6 +11,10 @@ const props = defineProps<{
   showChildren: boolean
 }>()
 
+const emits = defineEmits<{
+  'selectNode': [string]
+}>()
+
 const container = ref<HTMLElement>()
 
 const data = computed<Data>(() => {
@@ -224,6 +228,10 @@ onMounted(() => {
 
   const network = new Network(container.value!, data.value, options)
 
+  network.on('doubleClick', ({ nodes }) => {
+    emits('selectNode', nodes[0])
+  })
+
   watch(data, () => {
     network.setData(data.value)
   })
@@ -237,6 +245,6 @@ onMounted(() => {
 <style scoped>
 #container {
   width: 100%;
-  height: 80vh;
+  height: 100vh;
 }
 </style>

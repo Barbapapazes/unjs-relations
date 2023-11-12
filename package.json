@@ -2,6 +2,7 @@
   "name": "relations-unjs",
   "type": "module",
   "private": true,
+  "packageManager": "pnpm@8.7.1",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -16,6 +17,8 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^1.1.1",
+    "@iconify-json/ph": "^1.1.6",
+    "@iconify-json/simple-icons": "^1.1.78",
     "@nuxt/devtools": "latest",
     "eslint": "^8.53.0",
     "nuxt": "^3.8.1",

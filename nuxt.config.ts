@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
   modules: ['@nuxt/ui'],
+  ui: {
+    icons: ['simple-icons', 'ph'],
+  },
   nitro: {
     prerender: {
       crawlLinks: true,
@@ -26,5 +29,5 @@ export default defineNuxtConfig({
   colorMode: {
     preference: 'light',
   },
-  devtools: { enabled: true },
+  devtools: { enabled: false },
 })

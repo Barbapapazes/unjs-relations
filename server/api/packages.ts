@@ -10,6 +10,7 @@ export default defineEventHandler(async () => {
 
     return {
       name: repo.name,
+      description: repo.description,
       dependencies: Object.keys(pkg.dependencies || {}).filter(dependency => reposNames.includes(dependency)),
       devDependencies: Object.keys(pkg.devDependencies || {}).filter(dependency => reposNames.includes(dependency)),
     }
