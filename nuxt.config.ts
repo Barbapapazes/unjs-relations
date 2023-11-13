@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     icons: ['simple-icons', 'ph'],
   },
   nitro: {
+    static: true,
     prerender: {
       crawlLinks: true,
       routes: ['/', '/api/packages'],
