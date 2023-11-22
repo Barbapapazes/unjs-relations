@@ -2,6 +2,7 @@
 import type { Data, Edge, Options } from 'vis-network'
 import { Network } from 'vis-network'
 import type { Package } from '~/types/packages'
+import { _cyan, _pink, _violet, _yellow } from '#tailwind-config/theme/colors'
 
 const props = defineProps<{
   packages: Package[]
@@ -140,8 +141,8 @@ const data = computed<Data>(() => {
             from: pkg.name,
             to: dep,
             color: {
-              color: '#f9a8d4', // pink-300
-              highlight: '#ec4899', // pink-500
+              color: _pink[300],
+              highlight: _pink[500],
             },
             relation: 'dependencies',
             arrows: 'to',
@@ -155,8 +156,8 @@ const data = computed<Data>(() => {
             from: pkg.name,
             to: dep,
             color: {
-              color: '#d8b4fe', // pink-300
-              highlight: '#a855f7', // pink-500
+              color: _violet[300],
+              highlight: _violet[500],
             },
             relation: 'devDependencies',
             arrows: 'to',
@@ -205,21 +206,21 @@ onMounted(() => {
     groups: {
       selection: {
         color: {
-          background: '#F7F1BD', // yellow-300
-          border: '#ECDC5A', // yellow-500
+          background: _yellow[300],
+          border: _yellow[500],
           highlight: {
-            background: '#F2E78C', // yellow-400
-            border: '#D4C651', // yellow-600
+            background: _yellow[400],
+            border: _yellow[600],
           },
         },
       },
       dependencies: {
         color: {
-          background: '#ecfeff', // cyan-50
-          border: '#67e8f9', // cyan-300
+          background: _cyan[50],
+          border: _cyan[300],
           highlight: {
-            background: '#cffafe', // cyan-100
-            border: '#06b6d4', // cyan-500
+            background: _cyan[100],
+            border: _cyan[500],
           },
         },
       },

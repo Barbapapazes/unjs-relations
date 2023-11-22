@@ -12,10 +12,9 @@ if (!pkg.value) {
 
 const packages = computed(() => pkg.value!.map((p) => {
   return p.name
-}).sort(),
-)
+}).sort())
 
-const selected = ref<string[]>([])
+const selected = ref<string[]>(packages.value)
 
 function resetSelection() {
   selected.value = []
@@ -26,7 +25,7 @@ function selectAll() {
 }
 
 const showDependencies = ref<boolean>(true)
-const showDevDependencies = ref<boolean>(true)
+const showDevDependencies = ref<boolean>(false)
 const showChildren = ref<boolean>(false)
 
 const isSlideoverOpen = ref<boolean>(false)
@@ -51,16 +50,22 @@ function togglePackageToSelection(packageName: string) {
   else
     selected.value = [...selected.value, packageName]
 }
+
+useSeoMeta({
+  title: 'Relations UnJS',
+  description: 'Visualize the relations between UnJS packages',
+})
 </script>
 
 <template>
   <div class="relative">
     <div class="grid grid-cols-12">
-      <div class="p-2 max-h-screen col-span-2">
-        <UInput v-model="input" color="primary" variant="outline" placeholder="Search a package..." />
-        <ol class="py-1 px-2 h-[calc(100vh-80px)] overflow-y-auto">
+      <div class="py-2 pl-2 relative max-h-screen col-span-2">
+        <!-- todo: use headless ui for better keyboard support -->
+        <UInput v-model="input" color="primary" variant="outline" placeholder="Search a package..." class="z-10" />
+        <ol class="py-2 px-1 h-[calc(100vh-80px)] overflow-y-scroll">
           <li v-for="item in resultsPackages" :key="item">
-            <button type="button" class="py-1 w-full flex items-center justify-between rounded-lg hover:bg-zinc-100 transition ease-in" @click="togglePackageToSelection(item)">
+            <button type="button" class="px-1 py-1 w-full flex items-center justify-between rounded-md hover:bg-zinc-100 transition ease-in" @click="togglePackageToSelection(item)">
               <span class="flex items-center gap-2">
                 <UAvatar :src="`https://unjs.io/assets/logos/${item}.svg`" :alt="`Logo of ${item}`" size="xs" :ui="{ rounded: '' }" />
                 <span>
@@ -71,6 +76,8 @@ function togglePackageToSelection(packageName: string) {
             </button>
           </li>
         </ol>
+        <div class="absolute top-10 h-4 bg-gradient-to-b from-white via-white to-white/0 w-full" />
+        <div class="absolute bottom-10 h-4 bg-gradient-to-t from-white via-white to-white/0 w-full" />
         <div class="flex justify-between">
           <UButton color="red" variant="outline" @click="resetSelection">
             Reset selection
@@ -80,7 +87,7 @@ function togglePackageToSelection(packageName: string) {
           </UButton>
         </div>
       </div>
-      <div class="col-span-10 w-full h-full">
+      <div class="relative col-span-10 w-full h-full">
         <div
           v-if="!selected.length" class="h-full flex flex-col items-center justify-center gap-4"
         >
@@ -94,38 +101,16 @@ function togglePackageToSelection(packageName: string) {
           :packages="pkg!" :selection="selected"
           :show-dependencies="showDependencies" :show-dev-dependencies="showDevDependencies" :show-children="showChildren" @select-node="onSelectNode($event)"
         />
-      </div>
-    </div>
-    <!-- <div class="top-0 left-0 right-0 z-10 bg-white bg-opacity-60 backdrop-blur-lg">
-      <UContainer>
-        <UPage>
-          <div class="py-6 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
-            <div class="flex gap-4">
-              <USelectMenu
-                v-model="selected"
-                multiple
-                searchable
-                searchable-placeholder="Search packages"
-                placeholder="Select packages"
-                :options="packages"
-              />
-
-              <UButton color="red" variant="outline" @click="resetSelection">
-                Reset selection
-              </UButton>
-              <UButton color="primary" @click="selectAll">
-                Select all
-              </UButton>
-            </div>
-
-            <div class="flex gap-4">
-              <UCheckbox v-model="showDependencies" label="Show dependencies" name="dependencies" />
-              <UCheckbox v-model="showDevDependencies" label="Show devDependencies" name="devDependencies" />
-              <UCheckbox v-model="showChildren" label="Show children" name="children" />
-            </div>
+        <Card title="Settings" class="z-10 absolute bottom-4 left-4">
+          <div class="flex flex-col gap-1">
+            <UCheckbox v-model="showDependencies" label="Show dependencies" name="dependencies" />
+            <UCheckbox v-model="showDevDependencies" label="Show devDependencies" name="devDependencies" />
+            <UCheckbox v-model="showChildren" label="Show children" name="children" />
           </div>
+        </Card>
 
-          <div class="flex flex-row flex-wrap gap-4">
+        <Card title="Legend" class="z-10 absolute top-4 left-4">
+          <div class="flex flex-col gap-1">
             <div class="flex items-center gap-1">
               <span class="block rounded-full bg-yellow-500 w-2 h-2" />
               <span> Selected packages</span>
@@ -143,32 +128,23 @@ function togglePackageToSelection(packageName: string) {
               <span> Used as devDependencies </span>
             </div>
           </div>
-        </UPage>
-      </UContainer>
-    </div> -->
-    <!-- <div class="absolute z-10 bottom-0 left-0 right-0 bg-white bg-opacity-60 backdrop-blur-lg">
-      <UContainer>
-        <UPage>
-          <div class="py-6 flex flex-col md:flex-row items-center justify-center gap-4 text-sm text-zinc-500">
-            <span>
-              Made by <NuxtLink to="https://github.com/barbapapazes" target="_blank" rel="noopener">
-                Estéban Soubiran
-              </NuxtLink>
-            </span>
+        </Card>
 
+        <Card class="z-10 absolute bottom-4 right-4">
+          <div class="flex flex-col items-center gap-1">
             <UButton icon="i-simple-icons-github" to="https://github.com/barbapapazes/relations-unjs" target="blank" rel="noopener" variant="ghost" color="gray" size="xs">
               View Source
             </UButton>
+
+            <NuxtLink to="https://github.com/barbapapazes" target="_blank" rel="noopener" class="text-xs">
+              By Estéban S
+            </NuxtLink>
           </div>
-        </UPage>
-      </UContainer>
-    </div> -->
-    <!-- <Relations
-      :packages="pkg!" :selection="selected"
-      :show-dependencies="showDependencies" :show-dev-dependencies="showDevDependencies" :show-children="showChildren" @select-node="onSelectNode($event)"
-    />
+        </Card>
+      </div>
+    </div>
     <USlideover v-model="isSlideoverOpen">
-      <UCard class="flex flex-col flex-1" :ui="{ body: { base: 'flex-1' }, ring: '', divide: 'divide-y divide-zinc-100 dark:divide-zinc-800', header: { base: 'flex justify-between items-center' } }">
+      <UCard class="flex flex-col flex-1" :ui="{ body: { base: 'flex-1 overflow-y-auto' }, ring: '', divide: 'divide-y divide-zinc-100 dark:divide-zinc-800', header: { base: 'flex justify-between items-center' } }">
         <template #header>
           <h2 class="text-xl font-bold">
             {{ slideOverPackage?.name }}
@@ -231,6 +207,6 @@ function togglePackageToSelection(packageName: string) {
           </p>
         </div>
       </UCard>
-    </USlideover> -->
+    </USlideover>
   </div>
 </template>

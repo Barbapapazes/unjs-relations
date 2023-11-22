@@ -5,6 +5,6 @@
   <UMain>
     <NuxtLayout>
       <NuxtPage />
-    </NuxtLayout>
+  </NuxtLayout>
   </UMain>
 </template>

@@ -27,6 +27,9 @@ export default defineNuxtConfig({
       ],
     },
   },
+  tailwindcss: {
+    exposeConfig: true,
+  },
   colorMode: {
     preference: 'light',
   },
