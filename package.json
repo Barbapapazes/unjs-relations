@@ -16,7 +16,7 @@
     "@nuxt/ui-pro": "^0.4.2"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^1.2.1",
+    "@antfu/eslint-config": "^2.1.0",
     "@iconify-json/ph": "^1.1.6",
     "@iconify-json/simple-icons": "^1.1.79",
     "@nuxt/devtools": "latest",
