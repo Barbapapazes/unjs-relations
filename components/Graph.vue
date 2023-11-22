@@ -3,13 +3,12 @@ import type { Data, Edge, Options } from 'vis-network'
 import { Network } from 'vis-network'
 import type { Package } from '~/types/packages'
 import { _cyan, _pink, _violet, _yellow } from '#tailwind-config/theme/colors'
+import type { Settings } from '~/types/settings'
 
 const props = defineProps<{
   packages: Package[]
   selection: string[]
-  showDependencies: boolean
-  showDevDependencies: boolean
-  showChildren: boolean
+  settings: Settings
 }>()
 
 const emits = defineEmits<{
@@ -36,12 +35,12 @@ const data = computed<Data>(() => {
   // Use a condition to avoid unnecessary computation
   const selectionChildrenPackages: Package[] = []
   const selectionChildrenPackagesName: string[] = []
-  if (props.showChildren) {
+  if (props.settings.children) {
   /** Children */
     selectionChildrenPackages.push(...props.packages
     // Filter out packages that have not selected packages as dependencies or devDependencies
       .filter((pkg) => {
-        if (props.showDependencies) {
+        if (props.settings.dependencies) {
           // Check if current package use any of the selected packages
           const hasUsedBy = pkg.dependencies.some((dep) => {
             return props.selection.includes(dep)
@@ -51,7 +50,7 @@ const data = computed<Data>(() => {
             return true
         }
 
-        if (props.showDevDependencies) {
+        if (props.settings.devDependencies) {
           // Check if current package use any of the selected packages
           const hasUsedBy = pkg.devDependencies.some((dep) => {
             return props.selection.includes(dep)
@@ -88,10 +87,10 @@ const data = computed<Data>(() => {
     // Add current package for selection children packages
     deps.push(pkg.name)
 
-    if (props.showDependencies)
+    if (props.settings.dependencies)
       deps.push(...pkg.dependencies)
 
-    if (props.showDevDependencies)
+    if (props.settings.devDependencies)
       deps.push(...pkg.devDependencies)
 
     return deps
@@ -135,7 +134,7 @@ const data = computed<Data>(() => {
     ...dedupePackages.flatMap((pkg) => {
       const data: Edge[] = []
 
-      if (props.showDependencies) {
+      if (props.settings.dependencies) {
         data.push(...pkg.dependencies.map((dep) => {
           return {
             from: pkg.name,
@@ -150,7 +149,7 @@ const data = computed<Data>(() => {
         }))
       }
 
-      if (props.showDevDependencies) {
+      if (props.settings.devDependencies) {
         data.push(...pkg.devDependencies.map((dep) => {
           return {
             from: pkg.name,
