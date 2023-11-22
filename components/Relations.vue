@@ -239,12 +239,5 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="container" ref="container" />
+  <div ref="container" />
 </template>
-
-<style scoped>
-#container {
-  width: 100%;
-  height: 100vh;
-}
-</style>
