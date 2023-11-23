@@ -10,18 +10,18 @@ export default defineNuxtConfig({
       ssr: false,
     },
   },
-  nitro: {
-    prerender: {
-      routes: ['/api/packages'],
-    },
-    routeRules: {
-      '/api/packages': {
-        cache: {
-          maxAge: 60 * 60 * 24 * 7, // 1 week
-        },
-      },
-    },
-  },
+  // nitro: {
+  //   prerender: {
+  //     routes: ['/api/packages'],
+  //   },
+  //   routeRules: {
+  //     '/api/packages': {
+  //       cache: {
+  //         maxAge: 60 * 60 * 24 * 7, // 1 week
+  //       },
+  //     },
+  //   },
+  // },
   vite: {
     optimizeDeps: {
       include: [
