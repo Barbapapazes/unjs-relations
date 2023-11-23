@@ -5,5 +5,12 @@ export default defineAppConfig({
     button: {
       base: 'transition ease-in',
     },
+    select: {
+      color: {
+        white: {
+          outline: 'shadow-none',
+        },
+      },
+    },
   },
 })

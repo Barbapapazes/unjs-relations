@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { breakpointsTailwind } from '@vueuse/core'
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/vue'
 import { UInput } from '#components'
 import type { Package } from '~/types/packages'
@@ -34,7 +35,10 @@ function updateSettings(data: Settings) {
 
 const isSlideoverOpen = ref<boolean>(false)
 const slideOverPackage = ref<Package | null>(null)
-function onSelectNode(packageName: string) {
+function onSelectNode(packageName: string | null) {
+  if (!packageName)
+    return
+
   slideOverPackage.value = pkg.value!.find(p => p.name === packageName) || null
   isSlideoverOpen.value = true
 }
@@ -57,13 +61,17 @@ function openInRelations(packageName: string) {
   isSlideoverOpen.value = false
   selectedPackages.value = [packageName]
 }
+
+const isSettingsOpen = ref<boolean>(false)
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const lessXl = breakpoints.smaller('xl')
 </script>
 
 <template>
-  <!-- TODO: mobile version -->
   <div class="relative w-scree h-screen overflow-hidden">
-    <CardSlideover v-slot="{ close }" class="z-10 absolute top-4 left-4" open-class="bottom-4 w-80">
-      <div class="flex justify-between items-center">
+    <CardSlideover v-slot="{ close }" class="z-10 absolute top-4 left-4" open-class="xl:bottom-4 right-4 sm:right-auto sm:w-80">
+      <div class="mb-2 flex justify-between items-center">
         <div class="flex items-end gap-1">
           <h1 class="font-bold">
             UnJS Relations
@@ -77,7 +85,20 @@ function openInRelations(packageName: string) {
         </div>
         <CardSlideoverClose @click="close" />
       </div>
-      <Combobox v-model="selectedPackages" multiple as="div" class="mt-2">
+      <USelectMenu
+        v-if="lessXl"
+        v-model="selectedPackages" :options="packages" multiple placeholder="Select packages"
+        searchable
+        searchable-placeholder="Search a package..."
+      >
+        <template #option="{ option: packageName }">
+          <UAvatar :src="`https://unjs.io/assets/logos/${packageName}.svg`" :alt="`Logo of ${packageName}`" size="xs" :ui="{ rounded: '' }" />
+          <span>
+            {{ packageName }}
+          </span>
+        </template>
+      </USelectMenu>
+      <Combobox v-else v-model="selectedPackages" multiple as="div">
         <ComboboxInput v-model="query" :as="UInput" color="primary" variant="outline" placeholder="Search a package..." />
         <ComboboxOptions static as="ol" class="py-2 px-1 h-[calc(100vh-148px)] overflow-y-scroll">
           <template v-if="resultsPackages.length">
@@ -100,16 +121,21 @@ function openInRelations(packageName: string) {
           </div>
         </ComboboxOptions>
       </Combobox>
-      <div class="flex justify-between">
-        <UButton color="red" variant="outline" @click="resetSelection">
-          Reset selection
+      <div class="mt-2 xl:mt-0 flex justify-between">
+        <UButton class="xl:hidden" color="white" variant="ghost" size="xs" @click="isSettingsOpen = true">
+          Settings
         </UButton>
-        <UButton color="primary" @click="selectAll">
-          Select all
-        </UButton>
+        <div class="xl:grow flex gap-2 xl:justify-between">
+          <UButton color="red" variant="outline" :size="lessXl ? 'xs' : 'sm'" @click="resetSelection">
+            Reset selection
+          </UButton>
+          <UButton color="primary" :size="lessXl ? 'xs' : 'sm'" @click="selectAll">
+            Select all
+          </UButton>
+        </div>
       </div>
     </CardSlideover>
-    <CardSlideover v-slot="{ close }" right class="z-10 absolute top-4 right-4">
+    <CardSlideover v-if="!lessXl" v-slot="{ close }" right class="z-10 absolute top-4 right-4">
       <div class="flex justify-between items-center">
         <h2 class="text-sm font-bold">
           Settings
@@ -146,9 +172,8 @@ function openInRelations(packageName: string) {
       :settings="settings" @select-node="onSelectNode($event)"
     />
   </div>
-  <!-- TODO: fix slide over -->
   <USlideover v-model="isSlideoverOpen">
-    <UCard class="flex flex-col flex-1" :ui="{ body: { base: 'flex-1 overflow-y-auto' }, ring: '', divide: 'divide-y divide-zinc-100 dark:divide-zinc-800', header: { base: 'flex justify-between items-center' } }">
+    <UCard v-if="slideOverPackage" class="flex flex-col flex-1" :ui="{ body: { base: 'flex-1 overflow-y-auto' }, ring: '', divide: 'divide-y divide-zinc-100 dark:divide-zinc-800', header: { base: 'flex justify-between items-center' } }">
       <template #header>
         <h2 class="text-xl font-bold">
           {{ slideOverPackage?.name }}
@@ -212,6 +237,16 @@ function openInRelations(packageName: string) {
       </div>
     </UCard>
   </USlideover>
+  <UModal v-model="isSettingsOpen">
+    <div class="p-4">
+      <h2 class="text-sm font-bold">
+        Settings
+      </h2>
+      <div class="mt-1 flex flex-col gap-1">
+        <GraphSettings :settings="settings" @change="updateSettings($event)" />
+      </div>
+    </div>
+  </UModal>
 </template>
 
 <style>

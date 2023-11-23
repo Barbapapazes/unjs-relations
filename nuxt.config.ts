@@ -1,9 +1,14 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', '@vueuse/nuxt',],
   ui: {
     icons: ['simple-icons', 'ph'],
+  },
+  routeRules: {
+    '/': {
+      ssr: false,
+    },
   },
   nitro: {
     static: true,
