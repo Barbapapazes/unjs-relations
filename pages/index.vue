@@ -10,7 +10,7 @@ useSeoMeta({
   description: 'Visualize the relations between UnJS packages',
 })
 
-const { data: pkg } = await useFetch<Package[]>('/api/packages')
+const { data: pkg } = await useFetch<Package[]>('/api/packages.json')
 
 console.log(pkg)
 

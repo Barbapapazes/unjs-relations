@@ -12,10 +12,10 @@ export default defineNuxtConfig({
   },
   nitro: {
     prerender: {
-      routes: ['/api/packages'],
+      routes: ['/api/packages.json'],
     },
     routeRules: {
-      '/api/packages': {
+      '/api/packages.json': {
         cache: {
           maxAge: 60 * 60 * 24 * 7, // 1 week
         },
