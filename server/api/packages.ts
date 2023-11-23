@@ -1,6 +1,6 @@
 import type { GitHubFile, GitHubRepo } from '../types'
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
   const repos = await $fetch<{ repos: GitHubRepo[] }>('https://ungh.cc/orgs/unjs/repos').then(({ repos }) => repos.filter(repo => !internalRepos.has(repo.name)))
 
   const reposNames = repos.map(repo => repo.name)
@@ -16,5 +16,6 @@ export default defineEventHandler(async () => {
     }
   })))
 
+  setResponseHeader(event, 'Content-Type', 'application/json')
   return unjsDepsPerRepo.sort((a, b) => b.name.localeCompare(a.name))
 })
