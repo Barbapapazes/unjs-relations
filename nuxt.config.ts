@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
-  modules: ['@nuxt/ui', '@vueuse/nuxt',],
+  modules: ['@nuxt/ui', '@vueuse/nuxt'],
   ui: {
     icons: ['simple-icons', 'ph'],
   },
@@ -11,10 +11,8 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
-    static: true,
     prerender: {
-      crawlLinks: true,
-      routes: ['/', '/api/packages'],
+      routes: ['/api/packages'],
     },
     routeRules: {
       '/api/packages': {
