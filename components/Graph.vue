@@ -2,13 +2,13 @@
 import type { Data, Edge, Options } from 'vis-network'
 import { Network } from 'vis-network'
 import type { Package } from '~/types/packages'
+import { _cyan, _pink, _violet, _yellow } from '#tailwind-config/theme/colors'
+import type { Settings } from '~/types/settings'
 
 const props = defineProps<{
   packages: Package[]
   selection: string[]
-  showDependencies: boolean
-  showDevDependencies: boolean
-  showChildren: boolean
+  settings: Settings
 }>()
 
 const emits = defineEmits<{
@@ -35,12 +35,12 @@ const data = computed<Data>(() => {
   // Use a condition to avoid unnecessary computation
   const selectionChildrenPackages: Package[] = []
   const selectionChildrenPackagesName: string[] = []
-  if (props.showChildren) {
+  if (props.settings.children) {
   /** Children */
     selectionChildrenPackages.push(...props.packages
     // Filter out packages that have not selected packages as dependencies or devDependencies
       .filter((pkg) => {
-        if (props.showDependencies) {
+        if (props.settings.dependencies) {
           // Check if current package use any of the selected packages
           const hasUsedBy = pkg.dependencies.some((dep) => {
             return props.selection.includes(dep)
@@ -50,7 +50,7 @@ const data = computed<Data>(() => {
             return true
         }
 
-        if (props.showDevDependencies) {
+        if (props.settings.devDependencies) {
           // Check if current package use any of the selected packages
           const hasUsedBy = pkg.devDependencies.some((dep) => {
             return props.selection.includes(dep)
@@ -87,10 +87,10 @@ const data = computed<Data>(() => {
     // Add current package for selection children packages
     deps.push(pkg.name)
 
-    if (props.showDependencies)
+    if (props.settings.dependencies)
       deps.push(...pkg.dependencies)
 
-    if (props.showDevDependencies)
+    if (props.settings.devDependencies)
       deps.push(...pkg.devDependencies)
 
     return deps
@@ -134,14 +134,14 @@ const data = computed<Data>(() => {
     ...dedupePackages.flatMap((pkg) => {
       const data: Edge[] = []
 
-      if (props.showDependencies) {
+      if (props.settings.dependencies) {
         data.push(...pkg.dependencies.map((dep) => {
           return {
             from: pkg.name,
             to: dep,
             color: {
-              color: '#f9a8d4', // pink-300
-              highlight: '#ec4899', // pink-500
+              color: _pink[300],
+              highlight: _pink[500],
             },
             relation: 'dependencies',
             arrows: 'to',
@@ -149,14 +149,14 @@ const data = computed<Data>(() => {
         }))
       }
 
-      if (props.showDevDependencies) {
+      if (props.settings.devDependencies) {
         data.push(...pkg.devDependencies.map((dep) => {
           return {
             from: pkg.name,
             to: dep,
             color: {
-              color: '#d8b4fe', // pink-300
-              highlight: '#a855f7', // pink-500
+              color: _violet[300],
+              highlight: _violet[500],
             },
             relation: 'devDependencies',
             arrows: 'to',
@@ -205,21 +205,21 @@ onMounted(() => {
     groups: {
       selection: {
         color: {
-          background: '#F7F1BD', // yellow-300
-          border: '#ECDC5A', // yellow-500
+          background: _yellow[300],
+          border: _yellow[500],
           highlight: {
-            background: '#F2E78C', // yellow-400
-            border: '#D4C651', // yellow-600
+            background: _yellow[400],
+            border: _yellow[600],
           },
         },
       },
       dependencies: {
         color: {
-          background: '#ecfeff', // cyan-50
-          border: '#67e8f9', // cyan-300
+          background: _cyan[50],
+          border: _cyan[300],
           highlight: {
-            background: '#cffafe', // cyan-100
-            border: '#06b6d4', // cyan-500
+            background: _cyan[100],
+            border: _cyan[500],
           },
         },
       },
@@ -239,12 +239,5 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="container" ref="container" />
+  <div ref="container" />
 </template>
-
-<style scoped>
-#container {
-  width: 100%;
-  height: 100vh;
-}
-</style>
