@@ -10,6 +10,8 @@ export interface GitHubRepo {
   'stars': number
   'watchers': number
   'forks': number
+  // waiting for https://github.com/unjs/ungh/pull/70
+  // defaultBranch: string
 }
 
 export interface GitHubFile {
@@ -19,4 +21,16 @@ export interface GitHubFile {
   file: {
     contents: string
   }
+}
+
+export interface GitHubFiles {
+  meta: {
+    sha: string
+  }
+  files: {
+    path: string
+    mode: string
+    sha: string
+    size: number
+  }[]
 }

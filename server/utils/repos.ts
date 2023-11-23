@@ -1,3 +1,5 @@
+import type { GitHubRepo } from '../types'
+
 export const internalRepos = new Set([
   'eslint-config',
   'nitro-preset-starter',
@@ -24,3 +26,7 @@ export const internalRepos = new Set([
   'shiki-es',
   'workbox-cdn',
 ])
+
+export async function fetchUnjsRepos() {
+  return await $fetch<{ repos: GitHubRepo[] }>('https://ungh.cc/orgs/unjs/repos').then(({ repos }) => repos.filter(repo => !internalRepos.has(repo.name)))
+}
