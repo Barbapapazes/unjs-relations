@@ -1,21 +1,19 @@
-import type { GitHubFile, GitHubRepo } from '../types'
+import type { NpmPackage, UnjsPackage } from '../types'
 
 export default defineEventHandler(async (event) => {
-  const repos = await $fetch<{ repos: GitHubRepo[] }>('https://ungh.cc/orgs/unjs/repos').then(({ repos }) => repos.filter(repo => !internalRepos.has(repo.name)))
+  const unjsProjects = await $fetch<UnjsPackage[]>('https://unjs.io/api/content/packages.json')
+  const packages = unjsProjects.filter(project => project.npm).sort((a, b) => b.title.localeCompare(a.title))
+  const packageNames = packages.map(pkg => pkg.npm?.name)
 
-  const reposNames = repos.map(repo => repo.name)
-
-  const unjsDepsPerRepo = await Promise.all(repos.map(repo => $fetch<GitHubFile>(`https://ungh.cc/repos/unjs/${repo.name}/files/main/package.json`).then((file) => {
-    const pkg = JSON.parse(file.file.contents)
-
-    return {
-      name: repo.name,
-      description: repo.description,
-      dependencies: Object.keys(pkg.dependencies || {}).filter(dependency => reposNames.includes(dependency)),
-      devDependencies: Object.keys(pkg.devDependencies || {}).filter(dependency => reposNames.includes(dependency)),
-    }
-  })))
+  const npmPackages = await Promise.all(packages.map(pkg => $fetch<{ package: NpmPackage }>(`https://unnpm.pages.dev/packages/${pkg.npm?.name}`)))
 
   setResponseHeader(event, 'Content-Type', 'application/json')
-  return unjsDepsPerRepo.sort((a, b) => b.name.localeCompare(a.name))
+  return npmPackages.map(({ package: pkg }) => {
+    return {
+      name: pkg.name,
+      description: pkg.description,
+      dependencies: Object.keys(pkg.dependencies || {}).filter(dep => packageNames.includes(dep)),
+      devDependencies: Object.keys(pkg.devDependencies || {}).filter(dep => packageNames.includes(dep)),
+    }
+  })
 })
