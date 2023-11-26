@@ -11,6 +11,7 @@ export default defineEventHandler(async (event) => {
   return npmPackages.map(({ package: pkg }) => {
     return {
       name: pkg.name,
+      title: packages.find(p => p.npm?.name === pkg.name)?.title,
       description: pkg.description,
       dependencies: Object.keys(pkg.dependencies || {}).filter(dep => packageNames.includes(dep)),
       devDependencies: Object.keys(pkg.devDependencies || {}).filter(dep => packageNames.includes(dep)),

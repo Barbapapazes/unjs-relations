@@ -49,6 +49,16 @@ const resultsPackages = computed(() => {
   return packages.value.filter(p => p.includes(query.value))
 })
 
+function getLogo(packageName: string): string {
+  const logo = pkg.value!.find(p => p.name === packageName)?.title
+  return `https://unjs.io/assets/logos/${logo}.svg`
+}
+
+function getGitHubLink(packageName: string): string {
+  const repoName = pkg.value!.find(p => p.name === packageName)?.title
+  return `https//github.com/unjs/${repoName}`
+}
+
 function resetSelection() {
   selectedPackages.value = []
 }
@@ -105,7 +115,7 @@ const lessXl = breakpoints.smaller('xl')
             <ComboboxOption v-for="item in resultsPackages" :key="item" v-slot="{ active, selected }" as="template" :value="item">
               <li class="cursor-pointer px-1 py-1 w-full flex items-center justify-between rounded-md transition ease-in" :class="{ 'bg-gray-300/40': active }">
                 <span class="flex items-center gap-2">
-                  <UAvatar :src="`https://unjs.io/assets/logos/${item}.svg`" :alt="`Logo of ${item}`" size="xs" :ui="{ rounded: '' }" />
+                  <UAvatar :src="getLogo(item)" :alt="`Logo of ${item}`" size="xs" :ui="{ rounded: '' }" />
                   <span>
                     {{ item }}
                   </span>
@@ -179,7 +189,7 @@ const lessXl = breakpoints.smaller('xl')
           {{ slideOverPackage?.name }}
         </h2>
 
-        <UButton icon="i-simple-icons-github" label="View on GitHub" :to="`https://github.com/unjs/${slideOverPackage.name}`" target="_blank" variant="ghost" color="gray" />
+        <UButton icon="i-simple-icons-github" label="View on GitHub" :to="`https://github.com/unjs/${slideOverPackage.title}`" target="_blank" variant="ghost" color="gray" />
       </template>
 
       <div class="prose">
@@ -200,7 +210,7 @@ const lessXl = breakpoints.smaller('xl')
                 <UTooltip text="View relations">
                   <UButton icon="i-ph-graph" variant="ghost" color="gray" @click="openInRelations(dep)" />
                 </UTooltip>
-                <UButton icon="i-simple-icons-github" :to="`https://github.com/unjs/${dep}`" target="_blank" variant="ghost" color="gray" />
+                <UButton icon="i-simple-icons-github" :to="getGitHubLink(dep)" target="_blank" variant="ghost" color="gray" />
               </span>
             </span>
           </li>
@@ -224,7 +234,7 @@ const lessXl = breakpoints.smaller('xl')
                 <UTooltip text="View relations">
                   <UButton icon="i-ph-graph" variant="ghost" color="gray" @click="openInRelations(dep)" />
                 </UTooltip>
-                <UButton icon="i-simple-icons-github" :to="`https://github.com/unjs/${dep}`" target="_blank" variant="ghost" color="gray" />
+                <UButton icon="i-simple-icons-github" :to="getGitHubLink(dep)" target="_blank" variant="ghost" color="gray" />
               </span>
             </span>
           </li>

@@ -20,10 +20,14 @@ const container = ref<HTMLElement>()
 const data = computed<Data>(() => {
   /** Selection */
   const selectionNodes: Data['nodes'] = props.selection.map((select) => {
+    const logo = props.packages.find((pkg) => {
+      return pkg.name === select
+    })?.title
+
     return {
       id: select,
       label: select,
-      image: `https://unjs.io/assets/logos/${select}.svg`,
+      image: `https://unjs.io/assets/logos/${logo}.svg`,
       group: 'selection',
     }
   })
@@ -105,10 +109,14 @@ const data = computed<Data>(() => {
   })
 
   const allDependenciesNodes: Data['nodes'] = dedupedWithoutSelectionAllDependencies.flatMap((dep) => {
+    const logo = props.packages.find((pkg) => {
+      return pkg.name === dep
+    })?.title
+
     return {
       id: dep,
       label: dep,
-      image: `https://unjs.io/assets/logos/${dep}.svg`,
+      image: `https://unjs.io/assets/logos/${logo}.svg`,
       group: 'dependencies',
     }
   })
