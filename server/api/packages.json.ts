@@ -1,4 +1,5 @@
-import type { NpmPackage, UnjsPackage } from '../types'
+import type { UnjsPackage } from '../types'
+import type { NpmPackage } from '~/types/packages'
 
 export default defineEventHandler(async (event) => {
   const unjsProjects = await $fetch<UnjsPackage[]>('https://unjs.io/api/content/packages.json')
@@ -12,6 +13,7 @@ export default defineEventHandler(async (event) => {
     return {
       name: pkg.name,
       title: packages.find(p => p.npm?.name === pkg.name)?.title,
+      external: false,
       description: pkg.description,
       dependencies: Object.keys(pkg.dependencies || {}).filter(dep => packageNames.includes(dep)),
       devDependencies: Object.keys(pkg.devDependencies || {}).filter(dep => packageNames.includes(dep)),

@@ -7,7 +7,7 @@ import type { Settings } from '~/types/settings'
 
 const props = defineProps<{
   packages: Package[]
-  selection: string[]
+  selection: Package[]
   settings: Settings
 }>()
 
@@ -15,25 +15,23 @@ const emits = defineEmits<{
   'selectNode': [string]
 }>()
 
+const selectionNames = computed<string[]>(() => {
+  return props.selection.map((select) => {
+    return select.name
+  })
+})
+
 const container = ref<HTMLElement>()
 
 const data = computed<Data>(() => {
   /** Selection */
   const selectionNodes: Data['nodes'] = props.selection.map((select) => {
-    const logo = props.packages.find((pkg) => {
-      return pkg.name === select
-    })?.title
-
     return {
-      id: select,
-      label: select,
-      image: `https://unjs.io/assets/logos/${logo}.svg`,
+      id: select.name,
+      label: select.name,
+      image: select.external ? `https://api.iconify.design/logos/${select.name}-icon.svg` : `https://unjs.io/assets/logos/${select.title}.svg`,
       group: 'selection',
     }
-  })
-
-  const selectionPackages = props.packages.filter((pkg) => {
-    return props.selection.includes(pkg.name)
   })
 
   // Use a condition to avoid unnecessary computation
@@ -47,7 +45,7 @@ const data = computed<Data>(() => {
         if (props.settings.dependencies) {
           // Check if current package use any of the selected packages
           const hasUsedBy = pkg.dependencies.some((dep) => {
-            return props.selection.includes(dep)
+            return selectionNames.value.includes(dep)
           })
 
           if (hasUsedBy)
@@ -57,7 +55,7 @@ const data = computed<Data>(() => {
         if (props.settings.devDependencies) {
           // Check if current package use any of the selected packages
           const hasUsedBy = pkg.devDependencies.some((dep) => {
-            return props.selection.includes(dep)
+            return selectionNames.value.includes(dep)
           })
 
           if (hasUsedBy)
@@ -71,10 +69,10 @@ const data = computed<Data>(() => {
         return {
           ...pkg,
           dependencies: pkg.dependencies.filter((dep) => {
-            return props.selection.includes(dep)
+            return selectionNames.value.includes(dep)
           }),
           devDependencies: pkg.devDependencies.filter((dep) => {
-            return props.selection.includes(dep)
+            return selectionNames.value.includes(dep)
           }),
         }
       }))
@@ -85,7 +83,7 @@ const data = computed<Data>(() => {
   }
 
   /** Dependencies and Dev Dependencies */
-  const allDependencies = [...selectionPackages, ...selectionChildrenPackages].flatMap((pkg) => {
+  const allDependencies = [...props.selection, ...selectionChildrenPackages].flatMap((pkg) => {
     const deps = []
 
     // Add current package for selection children packages
@@ -105,7 +103,7 @@ const data = computed<Data>(() => {
 
   // Remove selected packages from all dependencies since they are already in selection
   const dedupedWithoutSelectionAllDependencies = dedupedAllDependencies.filter((dep) => {
-    return !props.selection.includes(dep)
+    return !selectionNames.value.includes(dep)
   })
 
   const allDependenciesNodes: Data['nodes'] = dedupedWithoutSelectionAllDependencies.flatMap((dep) => {
@@ -127,7 +125,7 @@ const data = computed<Data>(() => {
   ]
 
   // Order matters since we want to show the dependencies and devDependencies of the selected packages first (otherwise, some packages will not have all their dependencies shown)
-  const dedupePackages = [...selectionPackages, ...selectionChildrenPackages].reduce((acc, pkg) => {
+  const dedupePackages = [...props.selection, ...selectionChildrenPackages].reduce((acc, pkg) => {
     const index = acc.findIndex((p) => {
       return p.name === pkg.name
     })

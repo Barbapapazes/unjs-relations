@@ -10,6 +10,7 @@ export default defineNuxtConfig({
       ssr: false,
     },
   },
+  // add cache
   nitro: {
     prerender: {
       routes: ['/api/packages.json'],
@@ -36,5 +37,5 @@ export default defineNuxtConfig({
   colorMode: {
     preference: 'light',
   },
-  devtools: { enabled: false },
+  devtools: { enabled: true },
 })
