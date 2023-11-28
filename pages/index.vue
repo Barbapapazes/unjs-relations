@@ -7,17 +7,7 @@ useSeoMeta({
   description: 'Visualize the relations between UnJS packages',
 })
 
-const { data: pkg, error } = await useFetch<Package[]>('/api/packages.json')
-
-console.log(pkg.value, error.value)
-
-if (error.value) {
-  throw createError({
-    statusCode: 404,
-    message: 'Packages not found',
-    cause: error.value,
-  })
-}
+const { data: pkg } = await useFetch<Package[]>('/api/packages.json')
 
 const isSettingsOpen = ref<boolean>(false)
 const settings = ref<Settings>({
@@ -70,7 +60,7 @@ function onSelectNode(package_: Package | null) {
 function openInRelations(packageName: string) {
   isSlideoverOpen.value = false
 
-  const package_ = packages.value.find(pkg => pkg.name === packageName)
+  const package_ = packages.value.find(pkg => pkg.name === packageName) as Package
   selectedUnJSPackages.value = [package_]
   selectedNpmPackages.value = []
 }
