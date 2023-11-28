@@ -7,7 +7,7 @@ useSeoMeta({
   description: 'Visualize the relations between UnJS packages',
 })
 
-const { data: pkg } = await useFetch<Package[]>('/api/packages.json')
+const { data } = await useFetch<Package[]>('/api/packages.json')
 
 const isSettingsOpen = ref<boolean>(false)
 const settings = ref<Settings>({
@@ -21,7 +21,7 @@ function updateSettings(data: Settings) {
 
 const isLegendOpen = ref<boolean>(false)
 
-const unjsPackages = computed(() => pkg.value!.sort((a, b) => a.name.localeCompare(b.name)))
+const unjsPackages = computed(() => data.value!.sort((a, b) => a.name.localeCompare(b.name)))
 const selectedUnJSPackages = ref<Package[]>(unjsPackages.value)
 
 const isUnJSPackagesOpen = ref<boolean>(false)
@@ -38,7 +38,7 @@ function onNpmSelection(packages: Package[]) {
 
 const packages = computed(() => {
   return [
-    ...pkg.value!,
+    ...data.value!,
   ]
 })
 const selection = computed(() => {
@@ -93,7 +93,7 @@ const slideoverNpmLink = computed(() => {
  * Will only be used by a UnJS package
  */
 function getGitHubLink(packageName: string): string {
-  const repoName = pkg.value!.find(p => p.name === packageName)?.title
+  const repoName = data.value!.find(p => p.name === packageName)?.title
 
   return `https://github.com/unjs/${repoName}`
 }
