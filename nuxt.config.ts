@@ -5,12 +5,6 @@ export default defineNuxtConfig({
   ui: {
     icons: ['simple-icons', 'ph'],
   },
-  routeRules: {
-    '/': {
-      ssr: false,
-    },
-  },
-  // add cache
   nitro: {
     prerender: {
       routes: ['/api/packages.json'],
