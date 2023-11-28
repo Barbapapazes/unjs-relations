@@ -7,12 +7,13 @@ useSeoMeta({
   description: 'Visualize the relations between UnJS packages',
 })
 
-const { data: pkg } = await useFetch<Package[]>('/api/packages.json')
+const { data: pkg, error } = await useFetch<Package[]>('/api/packages.json')
 
-if (!pkg.value) {
+if (error.value) {
   throw createError({
     statusCode: 404,
     message: 'Packages not found',
+    cause: error.value,
   })
 }
 
