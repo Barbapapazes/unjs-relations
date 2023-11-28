@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   },
   nitro: {
     prerender: {
-      routes: ['/api/packages.json'],
+      routes: ['/', '/api/packages.json'],
     },
     routeRules: {
       '/api/packages.json': {
