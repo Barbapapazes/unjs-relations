@@ -22,6 +22,7 @@ const selection = ref<Package[]>([])
 const toast = useToast()
 const input = ref<string>('')
 const loading = ref<boolean>(false)
+// search for a package on npm using https://registry.npmjs.org/-/v1/search?text=nuxt
 async function addPackage() {
   const packageName = input.value.trim()
 
@@ -70,6 +71,11 @@ const search = computed(() => {
   return packages.value.filter(pkg => pkg.name.includes(query.value))
 })
 
+function removePackage(package_: Package) {
+  packages.value = packages.value.filter(pkg => pkg.name !== package_.name)
+  selection.value = selection.value.filter(pkg => pkg.name !== package_.name)
+}
+
 function clear() {
   selection.value = []
 }
@@ -81,7 +87,7 @@ function validate() {
 </script>
 
 <template>
-  <UModal :model-value="modelValue" :ui="{ width: 'xl:max-w-2xl' }" @update:model-value="close">
+  <UModal :model-value="modelValue" :ui="{ width: 'xl:max-w-3xl' }" @update:model-value="close">
     <UCard>
       <template #header>
         <div class="flex justify-between">
@@ -116,9 +122,9 @@ function validate() {
             </span>
           </div>
           <template v-else-if="search.length">
-            <ComboboxOption v-for="item in search" :key="item.name" v-slot="{ active, selected }" as="template" :value="item">
-              <li class="w-full">
-                <UButton :ui="{ base: 'w-full' }" :class="{ 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800': active }" color="gray" variant="ghost" :active="active" tabindex="-1">
+            <li v-for="item in search" :key="item.name" class="w-full flex flex-row gap-1">
+              <ComboboxOption v-slot="{ active, selected }" as="template" :value="item">
+                <UButton :ui="{ base: 'grow' }" :class="{ 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800': active }" color="gray" variant="ghost" :active="active" tabindex="-1">
                   <template #leading>
                     <UAvatar :src="getLogoURL(item)" aria-hidden="true" size="xs" :ui="{ rounded: '' }" />
                   </template>
@@ -129,8 +135,11 @@ function validate() {
                     <span class="i-ph-check" />
                   </template>
                 </UButton>
-              </li>
-            </ComboboxOption>
+              </ComboboxOption>
+              <UTooltip text="Delete">
+                <UButton color="red" variant="ghost" type="button" icon="i-ph-trash" @click="removePackage(item)" />
+              </UTooltip>
+            </li>
           </template>
 
           <div v-else class="text-center text-sm xl:col-span-3">

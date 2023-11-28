@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 
 const emits = defineEmits<{
-  'selectNode': [string]
+  'selectNode': [Package]
 }>()
 
 const selectionNames = computed<string[]>(() => {
@@ -235,7 +235,10 @@ onMounted(() => {
   const network = new Network(container.value!, data.value, options)
 
   network.on('doubleClick', ({ nodes }) => {
-    emits('selectNode', nodes[0])
+    const package_ = [...props.packages, ...props.selection].find((pkg) => {
+      return pkg.name === nodes[0]
+    }) as Package
+    emits('selectNode', package_)
   })
 
   watch(data, () => {

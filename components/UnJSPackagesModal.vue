@@ -6,6 +6,7 @@ import type { Package } from '~/types/packages'
 const props = defineProps<{
   modelValue: boolean
   packages: Package[]
+  selection: Package[]
 }>()
 
 const emits = defineEmits<{
@@ -22,10 +23,14 @@ const search = computed(() => {
   return props.packages.filter(pkg => pkg.name.includes(query.value))
 })
 
-const selection = ref<Package[]>([])
+const selection = ref<Package[]>(props.selection)
 
 function close() {
   emits('update:model-value', false)
+}
+
+function reset() {
+  selection.value = props.selection
 }
 
 function clear() {
@@ -39,7 +44,7 @@ function validate() {
 </script>
 
 <template>
-  <UModal :model-value="modelValue" :ui="{ width: 'xl:max-w-2xl' }" @update:model-value="close">
+  <UModal :model-value="modelValue" :ui="{ width: 'xl:max-w-3xl' }" @update:model-value="close">
     <UCard>
       <template #header>
         <div class="flex justify-between">
@@ -79,13 +84,18 @@ function validate() {
       </Combobox>
 
       <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton type="button" variant="ghost" color="red" @click="clear">
-            Clear
+        <div class="flex flex-row justify-between items-center">
+          <UButton type="button" variant="ghost" color="gray" @click="reset">
+            Reset
           </UButton>
-          <UButton type="button" @click="validate">
-            Validate
-          </UButton>
+          <div class="flex justify-end gap-2">
+            <UButton type="button" variant="ghost" color="red" @click="clear">
+              Clear
+            </UButton>
+            <UButton type="button" @click="validate">
+              Validate
+            </UButton>
+          </div>
         </div>
       </template>
     </UCard>
