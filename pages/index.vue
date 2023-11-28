@@ -9,6 +9,8 @@ useSeoMeta({
 
 const { data: pkg, error } = await useFetch<Package[]>('/api/packages.json')
 
+console.log(pkg.value, error.value)
+
 if (error.value) {
   throw createError({
     statusCode: 404,
