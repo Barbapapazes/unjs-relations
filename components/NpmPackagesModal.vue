@@ -64,10 +64,6 @@ async function addPackage() {
   }
 }
 
-function getLogoURL(package_: Package): string {
-  return `https://api.iconify.design/logos/${package_.name}-icon.svg`
-}
-
 const query = ref<string>('')
 const search = computed(() => {
   return packages.value.filter(pkg => pkg.name.includes(query.value))
@@ -128,7 +124,7 @@ function validate() {
               <ComboboxOption v-slot="{ active, selected }" as="template" :value="item">
                 <UButton :ui="{ base: 'grow' }" :class="{ 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800': active }" color="gray" variant="ghost" :active="active" tabindex="-1">
                   <template #leading>
-                    <UAvatar :src="getLogoURL(item)" aria-hidden="true" size="xs" :ui="{ rounded: '' }" />
+                   <NpmPackageLogo :name="item.name" />
                   </template>
                   <span class="grow text-start">
                     {{ item.name }}
