@@ -124,7 +124,7 @@ function validate() {
               <ComboboxOption v-slot="{ active, selected }" as="template" :value="item">
                 <UButton :ui="{ base: 'grow' }" :class="{ 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800': active }" color="gray" variant="ghost" :active="active" tabindex="-1">
                   <template #leading>
-                   <NpmPackageLogo :name="item.name" />
+                    <NpmPackageLogo :name="item.name" />
                   </template>
                   <span class="grow text-start">
                     {{ item.name }}
