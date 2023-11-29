@@ -1,5 +1,17 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  app: {
+    head: {
+      title: 'UnJS Relations',
+      meta: [{
+        name: 'description',
+        content: 'Visualize relations between UnJS packages',
+      }],
+      link: [{
+        rel: 'icon',
+        href: '/favicon.svg',
+      }],
+    },
+  },
   extends: ['@nuxt/ui-pro'],
   modules: ['@nuxt/ui', '@vueuse/nuxt'],
   ui: {
@@ -9,17 +21,15 @@ export default defineNuxtConfig({
     '/': {
       ssr: false,
     },
+    '/api/packages.json': {
+      cache: {
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+      },
+    },
   },
   nitro: {
     prerender: {
-      routes: ['/api/packages.json'],
-    },
-    routeRules: {
-      '/api/packages.json': {
-        cache: {
-          maxAge: 60 * 60 * 24 * 7, // 1 week
-        },
-      },
+      routes: ['/', '/api/packages.json'],
     },
   },
   vite: {
@@ -36,5 +46,5 @@ export default defineNuxtConfig({
   colorMode: {
     preference: 'light',
   },
-  devtools: { enabled: false },
+  devtools: { enabled: true },
 })

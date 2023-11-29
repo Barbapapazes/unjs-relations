@@ -1,18 +1,24 @@
+<script lang="ts" setup>
+const legend = [{
+  color: 'bg-yellow-500 ring-yellow-600',
+  text: 'Selected packages',
+}, {
+  color: 'bg-cyan-300 ring-cyan-500',
+  text: 'UnJS Packages',
+}, {
+  color: 'bg-pink-300 ring-pink-500',
+  text: 'Used as dependencies',
+}, {
+  color: 'bg-purple-300 ring-purple-500',
+  text: 'Used as devDependencies',
+}]
+</script>
+
 <template>
-  <div class="flex items-center gap-1">
-    <span class="block rounded-full bg-yellow-500 w-2 h-2" />
-    <span> Selected packages</span>
-  </div>
-  <div class="flex items-center gap-1">
-    <span class="block rounded-full bg-cyan-300 w-2 h-2" />
-    <span> UnJS Packages </span>
-  </div>
-  <div class="flex items-center gap-1">
-    <span class="block rounded-full bg-pink-300 w-2 h-2" />
-    <span> Used as dependencies </span>
-  </div>
-  <div class="flex items-center gap-1">
-    <span class="block rounded-full bg-purple-300 w-2 h-2" />
-    <span> Used as devDependencies </span>
-  </div>
+  <template v-for="item in legend" :key="item.text">
+    <div class="flex items-center gap-2">
+      <span class="block rounded-full w-3 h-3 ring-1" :class="item.color" />
+      <span> {{ item.text }}</span>
+    </div>
+  </template>
 </template>

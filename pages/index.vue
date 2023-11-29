@@ -1,87 +1,103 @@
 <script lang="ts" setup>
-import { breakpointsTailwind } from '@vueuse/core'
-import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/vue'
-import { UInput } from '#components'
 import type { Package } from '~/types/packages'
 import type { Settings } from '~/types/settings'
 
-useSeoMeta({
-  title: 'UnJS Relations',
-  description: 'Visualize the relations between UnJS packages',
-})
+const { data } = await useFetch<Package[]>('/api/packages.json')
 
-const { data: pkg } = await useFetch<Package[]>('/api/packages.json')
-
-if (!pkg.value) {
-  throw createError({
-    statusCode: 404,
-    message: 'Packages not found',
-  })
-}
-
-const packages = computed(() => pkg.value!.map((p) => {
-  return p.name
-}).sort()) as ComputedRef<string[]>
-
+const isSettingsOpen = ref<boolean>(false)
 const settings = ref<Settings>({
   dependencies: true,
   devDependencies: false,
   children: false,
 })
-
 function updateSettings(data: Settings) {
   settings.value = data
 }
 
-const isSlideoverOpen = ref<boolean>(false)
-const slideOverPackage = ref<Package | null>(null)
-function onSelectNode(packageName: string | null) {
-  if (!packageName)
-    return
+const isLegendOpen = ref<boolean>(false)
 
-  slideOverPackage.value = pkg.value!.find(p => p.name === packageName) || null
-  isSlideoverOpen.value = true
+const unjsPackages = computed(() => data.value!.sort((a, b) => a.name.localeCompare(b.name)))
+const selectedUnJSPackages = ref<Package[]>(unjsPackages.value)
+
+const isUnJSPackagesOpen = ref<boolean>(false)
+function onUnJSSelection(packages: Package[]) {
+  selectedUnJSPackages.value = packages
 }
 
-const query = ref<string>('')
-const selectedPackages = ref<string[]>(packages.value)
-const resultsPackages = computed(() => {
-  return packages.value.filter(p => p.includes(query.value))
+const selectedNpmPackages = ref<Package[]>([])
+
+const isNpmPackagesOpen = ref<boolean>(false)
+function onNpmSelection(packages: Package[]) {
+  selectedNpmPackages.value = packages
+}
+
+const packages = computed(() => {
+  return [
+    ...data.value!,
+  ]
+})
+const selection = computed(() => {
+  return [
+    ...selectedUnJSPackages.value,
+    ...selectedNpmPackages.value,
+  ]
 })
 
-function getLogo(packageName: string): string {
-  const logo = pkg.value!.find(p => p.name === packageName)?.title
-  return `https://unjs.io/assets/logos/${logo}.svg`
-}
+const isSlideoverOpen = ref<boolean>(false)
+const slideoverPackage = ref<Package | null>(null)
+function onSelectNode(package_: Package | null) {
+  if (!package_)
+    return
 
-function getGitHubLink(packageName: string): string {
-  const repoName = pkg.value!.find(p => p.name === packageName)?.title
-  return `https//github.com/unjs/${repoName}`
+  slideoverPackage.value = package_
+  isSlideoverOpen.value = true
 }
-
-function resetSelection() {
-  selectedPackages.value = []
-}
-
-function selectAll() {
-  selectedPackages.value = packages.value
-}
-
 function openInRelations(packageName: string) {
   isSlideoverOpen.value = false
-  selectedPackages.value = [packageName]
+
+  const package_ = packages.value.find(pkg => pkg.name === packageName) as Package
+  selectedUnJSPackages.value = [package_]
+  selectedNpmPackages.value = []
 }
 
-const isSettingsOpen = ref<boolean>(false)
+const slideoverGitHubLink = computed(() => {
+  if (!slideoverPackage.value)
+    return null
 
-const breakpoints = useBreakpoints(breakpointsTailwind)
-const lessXl = breakpoints.smaller('xl')
+  const isExternal = slideoverPackage.value.external
+
+  if (isExternal)
+    return null
+
+  return getGitHubLink(slideoverPackage.value.name)
+})
+
+const slideoverNpmLink = computed(() => {
+  if (!slideoverPackage.value)
+    return null
+
+  const isExternal = slideoverPackage.value.external
+
+  if (!isExternal)
+    return null
+
+  return `https://www.npmjs.com/package/${slideoverPackage.value.name}`
+})
+
+/**
+ * Will only be used by a UnJS package
+ */
+function getGitHubLink(packageName: string): string {
+  const repoName = data.value!.find(p => p.name === packageName)?.title
+
+  return `https://github.com/unjs/${repoName}`
+}
 </script>
 
 <template>
-  <div class="relative w-scree h-screen overflow-hidden">
-    <CardSlideover v-slot="{ close }" class="z-10 absolute top-4 left-4" open-class="xl:bottom-4 right-4 sm:right-auto sm:w-80">
-      <div class="mb-2 flex justify-between items-center">
+  <div class="relative w-screen h-screen overflow-hidden">
+    <CardSlideover v-slot="{ close }" class="z-10 absolute top-4 left-4" open-class="right-4 sm:right-auto">
+      <div class="mb-2 flex justify-between items-center gap-4">
         <div class="flex items-end gap-1">
           <h1 class="font-bold">
             UnJS Relations
@@ -95,81 +111,37 @@ const lessXl = breakpoints.smaller('xl')
         </div>
         <CardSlideoverClose @click="close" />
       </div>
-      <USelectMenu
-        v-if="lessXl"
-        v-model="selectedPackages" :options="packages" multiple placeholder="Select packages"
-        searchable
-        searchable-placeholder="Search a package..."
-      >
-        <template #option="{ option: packageName }">
-          <UAvatar :src="`https://unjs.io/assets/logos/${packageName}.svg`" :alt="`Logo of ${packageName}`" size="xs" :ui="{ rounded: '' }" />
-          <span>
-            {{ packageName }}
-          </span>
-        </template>
-      </USelectMenu>
-      <Combobox v-else v-model="selectedPackages" multiple as="div">
-        <ComboboxInput v-model="query" :as="UInput" color="primary" variant="outline" placeholder="Search a package..." />
-        <ComboboxOptions static as="ol" class="py-2 px-1 h-[calc(100vh-148px)] overflow-y-scroll">
-          <template v-if="resultsPackages.length">
-            <ComboboxOption v-for="item in resultsPackages" :key="item" v-slot="{ active, selected }" as="template" :value="item">
-              <li class="cursor-pointer px-1 py-1 w-full flex items-center justify-between rounded-md transition ease-in" :class="{ 'bg-gray-300/40': active }">
-                <span class="flex items-center gap-2">
-                  <UAvatar :src="getLogo(item)" :alt="`Logo of ${item}`" size="xs" :ui="{ rounded: '' }" />
-                  <span>
-                    {{ item }}
-                  </span>
-                </span>
-                <span v-if="selected" class="i-ph-check" />
-              </li>
-            </ComboboxOption>
-          </template>
-          <div v-else class="mt-1 text-center">
-            <span>
-              No results
-            </span>
-          </div>
-        </ComboboxOptions>
-      </Combobox>
-      <div class="mt-2 xl:mt-0 flex justify-between">
-        <UButton class="xl:hidden" color="white" variant="ghost" size="xs" @click="isSettingsOpen = true">
-          Settings
-        </UButton>
-        <div class="xl:grow flex gap-2 xl:justify-between">
-          <UButton color="red" variant="outline" :size="lessXl ? 'xs' : 'sm'" @click="resetSelection">
-            Reset selection
+
+      <section>
+        <h2 class="font-semibold">
+          Manage Packages
+        </h2>
+        <div class="mt-1 flex gap-2">
+          <UButton variant="solid" color="white" @click="isUnJSPackagesOpen = true">
+            <template #leading>
+              <UAvatar src="https://unjs.io/favicon.svg" alt="UnJS Logo" size="xs" :ui="{ rounded: 'rounded-sm' }" />
+            </template>
+            UnJS
           </UButton>
-          <UButton color="primary" :size="lessXl ? 'xs' : 'sm'" @click="selectAll">
-            Select all
+          <UButton icon="i-simple-icons-npm" variant="solid" color="white" @click="isNpmPackagesOpen = true">
+            npm
           </UButton>
         </div>
-      </div>
-    </CardSlideover>
-    <CardSlideover v-if="!lessXl" v-slot="{ close }" right class="z-10 absolute top-4 right-4">
-      <div class="flex justify-between items-center">
-        <h2 class="text-sm font-bold">
-          Settings
+      </section>
+
+      <section class="mt-2">
+        <h2 class="font-semibold">
+          Misc
         </h2>
-        <CardSlideoverClose @click="close" />
-      </div>
-      <div class="flex flex-col gap-1">
-        <GraphSettings :settings="settings" @change="updateSettings($event)" />
-      </div>
-    </CardSlideover>
-    <CardSlideover v-slot="{ close }" right class="z-10 absolute bottom-4 right-4">
-      <div class="flex justify-between items-center">
-        <h2 class="text-sm font-bold">
-          Legend
-        </h2>
-        <CardSlideoverClose @click="close" />
-      </div>
-      <div class="flex flex-col gap-1">
-        <GraphLegend />
-      </div>
+        <div class="mt-1 flex gap-2">
+          <UButton icon="i-ph-gear" variant="ghost" color="gray" label="Settings" @click="isSettingsOpen = true" />
+          <UButton icon="i-ph-flashlight" variant="ghost" color="gray" label="Legend" @click="isLegendOpen = true" />
+        </div>
+      </section>
     </CardSlideover>
 
     <div
-      v-if="!selectedPackages.length" class="h-full flex items-center justify-center gap-4"
+      v-if="!selection.length" class="h-full flex items-center justify-center gap-4"
     >
       <span class="font-medium">
         Start by selecting a package
@@ -178,30 +150,31 @@ const lessXl = breakpoints.smaller('xl')
     <Graph
       v-else
       class="h-full w-full"
-      :packages="pkg!" :selection="selectedPackages"
+      :packages="packages" :selection="selection"
       :settings="settings" @select-node="onSelectNode($event)"
     />
   </div>
   <USlideover v-model="isSlideoverOpen">
-    <UCard v-if="slideOverPackage" class="flex flex-col flex-1" :ui="{ body: { base: 'flex-1 overflow-y-auto' }, ring: '', divide: 'divide-y divide-zinc-100 dark:divide-zinc-800', header: { base: 'flex justify-between items-center' } }">
+    <UCard v-if="slideoverPackage" class="flex flex-col flex-1" :ui="{ body: { base: 'flex-1 overflow-y-auto' }, ring: '', divide: 'divide-y divide-zinc-100 dark:divide-zinc-800', header: { base: 'flex justify-between items-center' } }">
       <template #header>
         <h2 class="text-xl font-bold">
-          {{ slideOverPackage?.name }}
+          {{ slideoverPackage?.name }}
         </h2>
 
-        <UButton icon="i-simple-icons-github" label="View on GitHub" :to="`https://github.com/unjs/${slideOverPackage.title}`" target="_blank" variant="ghost" color="gray" />
+        <UButton v-if="slideoverGitHubLink" icon="i-simple-icons-github" label="View on GitHub" :to="slideoverGitHubLink" target="_blank" variant="ghost" color="gray" />
+        <UButton v-if="slideoverNpmLink" icon="i-simple-icons-npm" label="View on npm" :to="slideoverNpmLink" target="_blank" variant="ghost" color="gray" />
       </template>
 
       <div class="prose">
         <p>
-          {{ slideOverPackage?.description }}
+          {{ slideoverPackage?.description }}
         </p>
 
         <p>
           UnJS Dependencies:
         </p>
-        <ul v-if="slideOverPackage?.dependencies.length">
-          <li v-for="dep in slideOverPackage?.dependencies" :key="dep">
+        <ul v-if="slideoverPackage?.dependencies.length">
+          <li v-for="dep in slideoverPackage?.dependencies" :key="dep">
             <span class="not-prose flex items-center justify-between">
               <span>
                 {{ dep }}
@@ -225,7 +198,7 @@ const lessXl = breakpoints.smaller('xl')
           UnJS Dev dependencies:
         </p>
         <ul>
-          <li v-for="dep in slideOverPackage?.devDependencies" :key="dep">
+          <li v-for="dep in slideoverPackage?.devDependencies" :key="dep">
             <span class="not-prose flex items-center justify-between">
               <span>
                 {{ dep }}
@@ -239,7 +212,7 @@ const lessXl = breakpoints.smaller('xl')
             </span>
           </li>
         </ul>
-        <p v-if="!slideOverPackage?.devDependencies.length">
+        <p v-if="!slideoverPackage?.devDependencies.length">
           <em>
             No devDependencies
           </em>
@@ -249,14 +222,34 @@ const lessXl = breakpoints.smaller('xl')
   </USlideover>
   <UModal v-model="isSettingsOpen">
     <div class="p-4">
-      <h2 class="text-sm font-bold">
-        Settings
-      </h2>
-      <div class="mt-1 flex flex-col gap-1">
+      <div
+        class="flex justify-between items-center"
+      >
+        <h2 class="font-bold">
+          Settings
+        </h2>
+        <UButton color="gray" variant="ghost" icon="i-ph-x" class="-my-1" @click="isSettingsOpen = false" />
+      </div>
+      <div class="mt-2 flex flex-col gap-1">
         <GraphSettings :settings="settings" @change="updateSettings($event)" />
       </div>
     </div>
   </UModal>
+  <UModal v-model="isLegendOpen">
+    <div class="p-4">
+      <div class="flex justify-between items-center">
+        <h2 class="font-bold">
+          Legend
+        </h2>
+        <UButton color="gray" variant="ghost" icon="i-ph-x" class="-my-1" @click="isLegendOpen = false" />
+      </div>
+      <div class="mt-2 flex flex-col gap-1">
+        <GraphLegend />
+      </div>
+    </div>
+  </UModal>
+  <UnJsPackagesModal v-model="isUnJSPackagesOpen" :packages="unjsPackages" :selection="selectedUnJSPackages" @selection="onUnJSSelection($event)" />
+  <NpmPackagesModal v-model="isNpmPackagesOpen" :unjs-packages="unjsPackages" @selection="onNpmSelection($event)" />
 </template>
 
 <style>
