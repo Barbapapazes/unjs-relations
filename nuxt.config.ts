@@ -1,4 +1,17 @@
 export default defineNuxtConfig({
+  app: {
+    head: {
+      title: 'UnJS Relations',
+      meta: [{
+        name: 'description',
+        content: 'Visualize relations between UnJS packages',
+      }],
+      link: [{
+        rel: 'icon',
+        href: '/favicon.svg',
+      }],
+    },
+  },
   extends: ['@nuxt/ui-pro'],
   modules: ['@nuxt/ui', '@vueuse/nuxt'],
   ui: {

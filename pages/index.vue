@@ -2,11 +2,6 @@
 import type { Package } from '~/types/packages'
 import type { Settings } from '~/types/settings'
 
-useSeoMeta({
-  title: 'UnJS Relations',
-  description: 'Visualize the relations between UnJS packages',
-})
-
 const { data } = await useFetch<Package[]>('/api/packages.json')
 
 const isSettingsOpen = ref<boolean>(false)
