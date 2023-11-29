@@ -13,7 +13,7 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       // Cannot prerender / because of an error with the useFetch composable
-      routes: ['/api/packages.json'],
+      routes: ['/', '/api/packages.json'],
     },
     routeRules: {
       '/api/packages.json': {
