@@ -29,6 +29,7 @@ const data = computed<Data>(() => {
     return {
       id: select.name,
       label: select.name,
+      brokenImage: 'https://api.iconify.design/simple-icons/npm.svg',
       image: select.external ? `https://api.iconify.design/logos/${select.name}-icon.svg` : `https://unjs.io/assets/logos/${select.title}.svg`,
       group: 'selection',
     }
