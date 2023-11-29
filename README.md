@@ -8,9 +8,9 @@ Discover UnJS ecosystem from a new angle! 🔭
 
 [👉 Check it out](https://unjs-relations.barbapapazes.dev/)
 
-🪄 Visualize dependencies from UnJS packages
-👶 Print children UnJS dependencies
-🎨 Add any npm package to the graph
+- 🪄 Visualize dependencies from UnJS packages
+- 👶 Print children UnJS dependencies
+- 🎨 Add any npm package to the graph
 
 ## Setup
 
