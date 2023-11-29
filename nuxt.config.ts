@@ -5,11 +5,11 @@ export default defineNuxtConfig({
   ui: {
     icons: ['simple-icons', 'ph'],
   },
-  routeRules: {
-    '/': {
-      ssr: false,
-    },
-  },
+  // routeRules: {
+  //   '/': {
+  //     ssr: false,
+  //   },
+  // },
   nitro: {
     prerender: {
       // Cannot prerender / because of an error with the useFetch composable
