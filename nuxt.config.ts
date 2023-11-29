@@ -15,13 +15,13 @@ export default defineNuxtConfig({
       // Cannot prerender / because of an error with the useFetch composable
       routes: ['/', '/api/packages.json'],
     },
-    routeRules: {
-      '/api/packages.json': {
-        cache: {
-          maxAge: 60 * 60 * 24 * 7, // 1 week
-        },
-      },
-    },
+    // routeRules: {
+    //   '/api/packages.json': {
+    //     cache: {
+    //       maxAge: 60 * 60 * 24 * 7, // 1 week
+    //     },
+    //   },
+    // },
   },
   vite: {
     optimizeDeps: {
