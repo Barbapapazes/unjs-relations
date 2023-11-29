@@ -1,4 +1,5 @@
-import type { NpmPackage, UnJSPackage } from '../types'
+import type { UnJSPackage } from '../types'
+import type { NpmPackage } from '~/types/packages'
 
 export default defineEventHandler(async (event) => {
   const unjsProjects = await $fetch<UnJSPackage[]>('https://unjs.io/api/content/packages.json')
@@ -7,7 +8,6 @@ export default defineEventHandler(async (event) => {
 
   const npmPackages = await Promise.all(packages.map(pkg => $fetch<{ package: NpmPackage }>(`https://unnpm.pages.dev/packages/${pkg.npm?.name}`)))
 
-  setResponseHeader(event, 'Content-Type', 'application/json')
   return npmPackages.map(({ package: pkg }) => {
     return {
       name: pkg.name,

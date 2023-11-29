@@ -3,7 +3,8 @@ import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headl
 import { UInput } from '#components'
 import type { Package } from '~/types/packages'
 
-defineProps<{
+const props = defineProps<{
+  unjsPackages: Package[]
   modelValue: boolean
 }>()
 
@@ -27,7 +28,7 @@ async function addPackage() {
   const packageName = input.value.trim()
 
   loading.value = true
-  const { data, error } = await useFetch<Package>(`/api/npm/packages/${packageName}`)
+  const { data, error } = await fetchPackage(packageName)
   loading.value = false
 
   if (error.value) {
@@ -49,8 +50,9 @@ async function addPackage() {
   }
 
   if (data.value && packages.value.findIndex(p => p.name === data.value!.name) === -1) {
-    packages.value.push(data.value)
-    selection.value.push(data.value)
+    const newPackage = toPackage(data.value, props.unjsPackages)
+    packages.value.push(newPackage)
+    selection.value.push(newPackage)
     input.value = ''
   }
   else {
