@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import { fontFamily } from 'tailwindcss/defaultTheme'
 
 export default <Partial<Config>> {
   theme: {
@@ -17,6 +18,9 @@ export default <Partial<Config>> {
           900: '#47421B',
           950: '#2F2C12',
         },
+      },
+      fontFamily: {
+        sans: ['Nunito', 'Nunito fallback', ...fontFamily.sans],
       },
     },
   },

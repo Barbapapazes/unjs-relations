@@ -248,7 +248,7 @@ function getGitHubLink(packageName: string): string {
       </div>
     </div>
   </UModal>
-  <UnJsPackagesModal v-model="isUnJSPackagesOpen" :packages="unjsPackages" :selection="selectedUnJSPackages" @selection="onUnJSSelection($event)" />
+  <UnJSPackagesModal v-model="isUnJSPackagesOpen" :packages="unjsPackages" :selection="selectedUnJSPackages" @selection="onUnJSSelection($event)" />
   <NpmPackagesModal v-model="isNpmPackagesOpen" :unjs-packages="unjsPackages" @selection="onNpmSelection($event)" />
 </template>
 

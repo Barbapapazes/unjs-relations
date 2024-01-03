@@ -4,7 +4,7 @@ export default defineNuxtConfig({
       title: 'UnJS Relations',
       meta: [{
         name: 'description',
-        content: 'Visualize relations between UnJS packages',
+        content: 'Visualize relations between UnJS packages and the ecosystem.',
       }],
       link: [{
         rel: 'icon',
@@ -12,11 +12,13 @@ export default defineNuxtConfig({
       }],
     },
   },
-  extends: ['@nuxt/ui-pro'],
-  modules: ['@nuxt/ui', '@vueuse/nuxt'],
+
+  modules: ['@nuxt/ui', '@vueuse/nuxt', '@nuxtjs/google-fonts', '@nuxtjs/fontaine'],
+
   ui: {
     icons: ['simple-icons', 'ph'],
   },
+
   routeRules: {
     '/': {
       ssr: false,
@@ -27,11 +29,13 @@ export default defineNuxtConfig({
       },
     },
   },
+
   nitro: {
     prerender: {
       routes: ['/', '/api/packages.json'],
     },
   },
+
   vite: {
     optimizeDeps: {
       include: [
@@ -40,11 +44,26 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   tailwindcss: {
     exposeConfig: true,
   },
+
+  fontMetrics: {
+    fonts: ['Nunito'],
+  },
+
+  googleFonts: {
+    display: 'swap',
+    download: true,
+    families: {
+      Nunito: [300, 400, 500, 600, 700, 800],
+    },
+  },
+
   colorMode: {
     preference: 'light',
   },
+
   devtools: { enabled: true },
 })
