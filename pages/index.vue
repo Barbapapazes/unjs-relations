@@ -2,7 +2,7 @@
 import type { Package } from '~/types/packages'
 
 // We can't fetch on server since this will use the API endpoint and not the prerender file.
-const { data, error, pending } = await useFetch<Package[]>('/api/packages.json', {
+const { data, error, pending } = await useAsyncData<Package[]>('unjs-package', () => fetchUnJSPackages(), {
   server: false,
   default: () => [],
   transform: (data) => {

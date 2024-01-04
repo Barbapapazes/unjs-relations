@@ -13,4 +13,8 @@ export interface NpmPackage {
   version: string
   dependencies?: string[]
   devDependencies?: string[]
+  maintainers: {
+    name: string
+    email: string
+  }[]
 }

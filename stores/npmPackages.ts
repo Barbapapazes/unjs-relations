@@ -1,4 +1,5 @@
 import type { NpmPackage, Package } from '~/types/packages'
+import { fetchNpmPackage } from '~/composables/packages'
 
 export const useNpmPackagesStore = defineStore('npmPackages', () => {
   const packages = ref<Package[]>([])
@@ -20,9 +21,7 @@ export const useNpmPackagesStore = defineStore('npmPackages', () => {
       return cachedPackage
     }
 
-    const { data, error } = await useFetch<{ package: NpmPackage }>(`https://unnpm.pages.dev/packages/${name}`, {
-      server: false,
-    })
+    const { data, error } = await useAsyncData<{ package: NpmPackage }>(`npm:${name}`, () => fetchNpmPackage(name))
 
     if (error.value) {
       if (error.value?.statusCode === 404) {

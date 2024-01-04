@@ -29,5 +29,8 @@
     "vis-network": "^9.1.9",
     "vue": "^3.4.3",
     "vue-router": "^4.2.5"
+  },
+  "dependencies": {
+    "myzod": "^1.11.0"
   }
 }
