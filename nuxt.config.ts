@@ -5,6 +5,10 @@ export default defineNuxtConfig({
     icons: ['simple-icons', 'heroicons'],
   },
 
+  css: [
+    '~/assets/app.css',
+  ],
+
   routeRules: {
     '/api/packages.json': {
       cache: {
