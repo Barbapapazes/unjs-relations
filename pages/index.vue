@@ -21,18 +21,29 @@ watch(error, () => {
 const toast = useToast()
 
 const openMenu = ref<boolean>(true)
-defineShortcuts({
-  ctrl_h: {
-    handler() {
-      openMenu.value = !openMenu.value
-    },
-  },
-})
 
 const openSettings = ref<boolean>(false)
 const openLegend = ref<boolean>(false)
 const openUnJSPackages = ref<boolean>(false)
 const openNpmPackages = ref<boolean>(false)
+
+defineShortcuts({
+  meta_h: {
+    handler() {
+      openMenu.value = !openMenu.value
+    },
+  },
+  meta_s: {
+    handler() {
+      openSettings.value = !openSettings.value
+    },
+  },
+  meta_l: {
+    handler() {
+      openLegend.value = !openLegend.value
+    },
+  },
+})
 
 const queryPackages = getRoutePackages('packages[]')
 const selectedUnJSPackages = computed(() => {
