@@ -16,7 +16,7 @@ useHead({
 </script>
 
 <template>
-  <main class="font-sans">
+  <main class="font-sans dark:bg-gray-900">
     <NuxtPage />
   </main>
 

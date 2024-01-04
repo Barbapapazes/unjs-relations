@@ -2,7 +2,7 @@
 import type { Data, Edge, Options } from 'vis-network'
 import { Network } from 'vis-network'
 import type { Package } from '~/types/packages'
-import { _cyan, _pink, _violet, _yellow } from '#tailwind-config/theme/colors'
+import { _black, _cyan, _pink, _violet, _white, _yellow } from '#tailwind-config/theme/colors'
 
 const props = defineProps<{
   packages: Package[]
@@ -12,6 +12,8 @@ const props = defineProps<{
 const emits = defineEmits<{
   'selectNode': [Package]
 }>()
+
+const colorMode = useColorMode()
 
 const {
   showDependencies,
@@ -146,13 +148,15 @@ const data = computed<Data>(() => {
       const data: Edge[] = []
 
       if (showDependencies.value) {
+        const color = colorMode.preference === 'light' ? _pink[300] : _pink[900]
+        const highlight = colorMode.preference === 'light' ? _pink[500] : _pink[800]
         data.push(...pkg.dependencies.map((dep) => {
           return {
             from: pkg.name,
             to: dep,
             color: {
-              color: _pink[300],
-              highlight: _pink[500],
+              color,
+              highlight,
             },
             relation: 'dependencies',
             arrows: 'to',
@@ -161,13 +165,15 @@ const data = computed<Data>(() => {
       }
 
       if (showDevDependencies.value) {
+        const color = colorMode.preference === 'light' ? _violet[300] : _violet[900]
+        const highlight = colorMode.preference === 'light' ? _violet[500] : _violet[800]
         data.push(...pkg.devDependencies.map((dep) => {
           return {
             from: pkg.name,
             to: dep,
             color: {
-              color: _violet[300],
-              highlight: _violet[500],
+              color,
+              highlight,
             },
             relation: 'devDependencies',
             arrows: 'to',
@@ -186,7 +192,7 @@ const data = computed<Data>(() => {
 })
 
 onMounted(() => {
-  const options: Options = {
+  const generalOptions: Options = {
     nodes: {
       shape: 'circularImage',
       imagePadding: 6,
@@ -213,8 +219,14 @@ onMounted(() => {
         iterations: 200,
       },
     },
+  }
+  const lightOptions: Options = {
     groups: {
       selection: {
+        font: {
+          color: _black,
+          face: 'Nunito',
+        },
         color: {
           background: _yellow[300],
           border: _yellow[500],
@@ -225,6 +237,10 @@ onMounted(() => {
         },
       },
       dependencies: {
+        font: {
+          color: _black,
+          face: 'Nunito',
+        },
         color: {
           background: _cyan[50],
           border: _cyan[300],
@@ -236,8 +252,43 @@ onMounted(() => {
       },
     },
   }
+  const darkOptions: Options = {
+    groups: {
+      selection: {
+        font: {
+          color: _white,
+          face: 'Nunito',
+        },
+        color: {
+          background: _yellow[900],
+          border: _yellow[600],
+          highlight: {
+            background: _yellow[700],
+            border: _yellow[500],
+          },
+        },
+      },
+      dependencies: {
+        font: {
+          color: _white,
+          face: 'Nunito',
+        },
+        color: {
+          background: _cyan[900],
+          border: _cyan[600],
+          highlight: {
+            background: _cyan[700],
+            border: _cyan[500],
+          },
+        },
+      },
+    },
+  }
 
-  const network = new Network(container.value!, data.value, options)
+  const network = new Network(container.value!, data.value, {
+    ...generalOptions,
+    ...colorMode.value === 'light' ? lightOptions : darkOptions,
+  })
 
   network.on('doubleClick', ({ nodes }) => {
     const package_ = [...props.packages, ...props.selection].find((pkg) => {
@@ -248,6 +299,15 @@ onMounted(() => {
 
   watch(data, () => {
     network.setData(data.value)
+  })
+
+  watch(() => colorMode.preference, () => {
+    network.setOptions({
+      ...generalOptions,
+      ...colorMode.preference === 'light' ? lightOptions : darkOptions,
+    })
+
+    network.redraw()
   })
 })
 </script>

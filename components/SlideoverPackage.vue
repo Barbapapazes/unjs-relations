@@ -48,7 +48,7 @@ function getGitHubLink(packageName: string): string {
 
 <template>
   <USlideover :model-value="modelValue" @update:model-value="emits('update:modelValue', $event)">
-    <UCard class="flex flex-col flex-1" :ui="{ body: { base: 'flex-1 overflow-y-auto' }, ring: '', divide: 'divide-y divide-zinc-100 dark:divide-zinc-800', header: { base: 'flex justify-between items-center' } }">
+    <UCard class="flex flex-col flex-1" :ui="{ body: { base: 'flex-1 overflow-y-auto' }, ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800', header: { base: 'flex justify-between items-center' } }">
       <template #header>
         <h2 v-if="package" class="text-xl font-bold">
           {{ package.name }}
@@ -58,7 +58,7 @@ function getGitHubLink(packageName: string): string {
         <UButton v-if="slideoverNpmLink" icon="i-simple-icons-npm" label="View on npm" :to="slideoverNpmLink" target="_blank" variant="ghost" color="gray" />
       </template>
 
-      <div class="prose">
+      <div class="prose dark:prose-invert">
         <p v-if="package">
           {{ package.description }}
         </p>

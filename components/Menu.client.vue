@@ -48,7 +48,7 @@ watch(menuStorage, (value) => {
       </div>
 
       <section>
-        <h2 class="font-semibold">
+        <h2 class="font-semibold dark:text-gray-200">
           Manage Packages
         </h2>
         <div class="mt-1 flex gap-2">
@@ -65,7 +65,7 @@ watch(menuStorage, (value) => {
       </section>
 
       <section class="mt-2">
-        <h2 class="font-semibold">
+        <h2 class="font-semibold dark:text-gray-200">
           Misc
         </h2>
         <div class="mt-1 flex gap-2">
