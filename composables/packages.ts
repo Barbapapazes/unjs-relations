@@ -133,8 +133,8 @@ export async function fetchNpmPackage(name: string) {
       name: myzod.string(),
       version: myzod.string(),
       description: myzod.string().or(myzod.undefined()),
-      dependencies: myzod.object({}).allowUnknownKeys(),
-      devDependencies: myzod.object({}).allowUnknownKeys(),
+      dependencies: myzod.record(myzod.string()),
+      devDependencies: myzod.record(myzod.string()),
       maintainers: myzod.array(myzod.object({
         name: myzod.string(),
         email: myzod.string(),
