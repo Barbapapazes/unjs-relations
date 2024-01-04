@@ -12,6 +12,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
+  "dependencies": {
+    "myzod": "^1.11.0"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.1",
     "@iconify-json/heroicons": "^1.1.19",
@@ -29,8 +32,5 @@
     "vis-network": "^9.1.9",
     "vue": "^3.4.3",
     "vue-router": "^4.2.5"
-  },
-  "dependencies": {
-    "myzod": "^1.11.0"
   }
 }
