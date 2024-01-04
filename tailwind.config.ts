@@ -22,6 +22,19 @@ export default <Partial<Config>> {
       fontFamily: {
         sans: ['Nunito', 'Nunito fallback', ...fontFamily.sans],
       },
+      typography: () => ({
+        DEFAULT: {
+          css: {
+            'h1 a,h2 a,h3 a,h4 a,h5 a,h6 a': {
+              'text-decoration-line': 'none',
+            },
+            'p a, ul a': {
+              'text-decoration-line': 'underline',
+              'text-underline-offset': '0.2em',
+            },
+          },
+        },
+      }),
     },
   },
 }

@@ -4,6 +4,7 @@ const emits = defineEmits<{
   'update:legend': [boolean]
   'update:unjs-packages': [boolean]
   'update:npm-packages': [boolean]
+  'update:info': [boolean]
 }>()
 
 const menuStorage = useLocalStorage('unjs-relations-menu', { x: 16, y: 16 }, { listenToStorageChanges: true })
@@ -68,9 +69,12 @@ watch(menuStorage, (value) => {
         <h2 class="font-semibold dark:text-gray-200">
           Misc
         </h2>
-        <div class="mt-1 flex gap-2">
-          <UButton icon="i-heroicons-cog-8-tooth" variant="ghost" color="gray" label="Settings" @click="emits('update:settings', true)" />
-          <UButton icon="i-heroicons-tag" variant="ghost" color="gray" label="Legend" @click="emits('update:legend', true)" />
+        <div class="mt-1 flex justify-between">
+          <div class="flex gap-2">
+            <UButton icon="i-heroicons-cog-8-tooth" variant="ghost" color="gray" label="Settings" @click="emits('update:settings', true)" />
+            <UButton icon="i-heroicons-tag" variant="ghost" color="gray" label="Legend" @click="emits('update:legend', true)" />
+          </div>
+          <UButton icon="i-heroicons-information-circle" color="gray" variant="ghost" aria-label="Info" @click="emits('update:info', true)" />
         </div>
       </section>
     </AppCard>

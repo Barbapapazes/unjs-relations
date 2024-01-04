@@ -26,6 +26,7 @@ const openSettings = ref<boolean>(false)
 const openLegend = ref<boolean>(false)
 const openUnJSPackages = ref<boolean>(false)
 const openNpmPackages = ref<boolean>(false)
+const openInfo = ref<boolean>(false)
 
 defineShortcuts({
   meta_h: {
@@ -41,6 +42,21 @@ defineShortcuts({
   meta_l: {
     handler() {
       openLegend.value = !openLegend.value
+    },
+  },
+  meta_i: {
+    handler() {
+      openInfo.value = !openInfo.value
+    },
+  },
+  meta_u: {
+    handler() {
+      openUnJSPackages.value = !openUnJSPackages.value
+    },
+  },
+  meta_n: {
+    handler() {
+      openNpmPackages.value = !openNpmPackages.value
     },
   },
 })
@@ -145,11 +161,13 @@ useSeoMeta({
     <Menu
       v-if="openMenu"
       @update:settings="openSettings = $event" @update:legend="openLegend = $event"
+      @update:info="openInfo = $event"
       @update:unjs-packages="openUnJSPackages = $event" @update:npm-packages="openNpmPackages = $event"
     />
 
     <ModalSettings v-model="openSettings" />
     <ModalLegend v-model="openLegend" />
+    <ModalInfo v-model="openInfo" />
 
     <SlideoverPackage
       v-model="openSlideoverPackage"
