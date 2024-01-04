@@ -166,7 +166,6 @@ useSeoMeta({
     </div>
   </div>
 
-  <!-- v-if is used to avoid to create component before having selection data -->
   <ModalUnJSPackages v-model="openUnJSPackages" :packages="data" :selection="selectedUnJSPackages" @update:selection="onUnJSPackagesSelection($event)" />
   <ModalNpmPackages
     v-model="openNpmPackages" :unjs-packages="data"
@@ -174,25 +173,3 @@ useSeoMeta({
     @update:selection="onNpmSelection($event)"
   />
 </template>
-
-<style>
-.slide-left-enter-active,
-.slide-left-leave-active {
-  transition: all 0.3s ease;
-}
-
-.slide-left-enter-from,
-.slide-left-leave-to {
-  transform: translateX(calc(-100% - 1rem));
-}
-
-.slide-right-enter-active,
-.slide-right-leave-active {
-  transition: all 0.3s ease;
-}
-
-.slide-right-enter-from,
-.slide-right-leave-to {
-  transform: translateX(calc(100% + 1rem));
-}
-</style>
