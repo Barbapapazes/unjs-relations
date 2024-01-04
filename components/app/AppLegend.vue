@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+// TODO: add npm and github
 const legend = [{
   color: 'bg-yellow-500 ring-yellow-600',
   text: 'Selected packages',

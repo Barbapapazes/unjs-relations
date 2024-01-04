@@ -11,26 +11,26 @@ const props = defineProps<{
 
 const emits = defineEmits<{
   'update:model-value': [boolean]
-  'selection': [Package[]]
+  'update:selection': [Package[]]
 }>()
-
-function getLogoURL(package_: Package): string {
-  return `https://unjs.io/assets/logos/${package_.title}.svg`
-}
 
 const query = ref<string>('')
 const search = computed(() => {
   return props.packages.filter(pkg => pkg.name.includes(query.value))
 })
 
-const selection = ref<Package[]>(props.selection)
+const selection = ref<Package[]>([...props.selection])
+// Used to update the selection when the parent changes
+watch(() => props.selection, () => {
+  selection.value = [...props.selection]
+})
 
 function close() {
   emits('update:model-value', false)
 }
 
 function reset() {
-  selection.value = props.selection
+  selection.value = [...props.selection]
 }
 
 function clear() {
@@ -38,8 +38,12 @@ function clear() {
 }
 
 function validate() {
-  emits('selection', selection.value)
+  emits('update:selection', selection.value)
   close()
+}
+
+function getLogoURL(package_: Package): string {
+  return `https://unjs.io/assets/logos/${package_.title}.svg`
 }
 </script>
 
@@ -55,7 +59,7 @@ function validate() {
         </div>
       </template>
 
-      <Combobox v-model="selection" multiple as="template">
+      <Combobox v-model="selection" multiple by="name" as="template">
         <ComboboxInput v-model="query" :as="UInput" color="primary" variant="outline" placeholder="Search a package..." class="mb-2" />
         <ComboboxOptions static as="ol" class="grid xl:grid-cols-3 gap-2">
           <template v-if="search.length">
@@ -69,7 +73,7 @@ function validate() {
                     {{ item.name }}
                   </span>
                   <template v-if="selected" #trailing>
-                    <span class="i-ph-check" />
+                    <span class="i-heroicons-check" />
                   </template>
                 </UButton>
               </li>

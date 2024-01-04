@@ -1,7 +1,7 @@
 import type { NpmPackage, Package } from '../types/packages'
 
-export function toPackage(npmPackage: NpmPackage, unjsPackage: Package[]): Package {
-  const unjsPackagesName = unjsPackage.map(pkg => pkg.name)
+export function toPackage(npmPackage: NpmPackage, unjsPackages: Package[]): Package {
+  const unjsPackagesName = unjsPackages.map(pkg => pkg.name)
 
   return {
     name: npmPackage.name,
