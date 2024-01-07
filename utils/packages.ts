@@ -1,14 +1,14 @@
-import type { NpmPackage, Package } from '../types/packages'
+import type { InternalPackage, InternalPackageSource, PackageJson } from '../types/packages'
 
-export function toPackage(npmPackage: NpmPackage, unjsPackage: Package[]): Package {
-  const unjsPackagesName = unjsPackage.map(pkg => pkg.name)
+export function toInternalPackage(packageJson: PackageJson, source: InternalPackageSource, unjsPackages: InternalPackage[]): InternalPackage {
+  const unjsPackageNames = unjsPackages.map(pkg => pkg.name)
 
   return {
-    name: npmPackage.name,
-    title: npmPackage.name,
-    external: !unjsPackagesName.includes(npmPackage.name),
-    description: npmPackage.description,
-    dependencies: Object.keys(npmPackage.dependencies || {}).filter(dep => unjsPackagesName.includes(dep)),
-    devDependencies: Object.keys(npmPackage.devDependencies || {}).filter(dep => unjsPackagesName.includes(dep)),
+    name: packageJson.name,
+    title: packageJson.name,
+    description: packageJson.description,
+    dependencies: Object.keys(packageJson.dependencies || {}).filter(dep => unjsPackageNames.includes(dep)),
+    devDependencies: Object.keys(packageJson.devDependencies || {}).filter(dep => unjsPackageNames.includes(dep)),
+    source,
   }
 }
