@@ -1,17 +1,17 @@
 <script lang="ts" setup>
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/vue'
 import { UInput } from '#components'
-import type { Package } from '~/types/packages'
+import type { InternalPackage } from '~/types/packages'
 
 const props = defineProps<{
   modelValue: boolean
-  packages: Package[]
-  selection: Package[]
+  packages: InternalPackage[]
+  selection: InternalPackage[]
 }>()
 
 const emits = defineEmits<{
   'update:model-value': [boolean]
-  'update:selection': [Package[]]
+  'update:selection': [InternalPackage[]]
 }>()
 
 const query = ref<string>('')
@@ -19,7 +19,7 @@ const search = computed(() => {
   return props.packages.filter(pkg => pkg.name.includes(query.value))
 })
 
-const selection = ref<Package[]>([...props.selection])
+const selection = ref<InternalPackage[]>([...props.selection])
 // Used to update the selection when the parent changes
 watch(() => props.selection, () => {
   selection.value = [...props.selection]
@@ -42,8 +42,8 @@ function validate() {
   close()
 }
 
-function getLogoURL(package_: Package): string {
-  return `https://unjs.io/assets/logos/${package_.title}.svg`
+function getLogoURL(internalPackage: InternalPackage): string {
+  return `https://unjs.io/assets/logos/${internalPackage.title}.svg`
 }
 </script>
 

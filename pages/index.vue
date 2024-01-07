@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import type { Package } from '~/types/packages'
+import type { InternalPackage } from '~/types/packages'
 
 // We can't fetch on server since this will use the API endpoint and not the prerender file.
-const { data, error, pending } = await useAsyncData<Package[]>('unjs-package', () => fetchUnJSPackages(), {
+const { data, error, pending } = await useAsyncData('unjs-package', () => fetchUnJSPackages(), {
   server: false,
-  default: () => [],
+  default: () => [] as InternalPackage[],
   transform: (data) => {
     return data.sort((a, b) => a.name.localeCompare(b.name))
   },
@@ -26,6 +26,7 @@ const openSettings = ref<boolean>(false)
 const openLegend = ref<boolean>(false)
 const openUnJSPackages = ref<boolean>(false)
 const openNpmPackages = ref<boolean>(false)
+const openGitHubPackages = ref<boolean>(false)
 const openInfo = ref<boolean>(false)
 
 defineShortcuts({
@@ -59,6 +60,11 @@ defineShortcuts({
       openNpmPackages.value = !openNpmPackages.value
     },
   },
+  meta_g: {
+    handler() {
+      openGitHubPackages.value = !openGitHubPackages.value
+    },
+  },
 })
 
 const queryPackages = getRoutePackages('packages[]')
@@ -66,16 +72,12 @@ const selectedUnJSPackages = computed(() => {
   if (!queryPackages.value)
     return data.value
 
-  return findPackages(data.value, queryPackages.value)
+  return data.value.filter((pkg) => {
+    return queryPackages.value!.includes(pkg.name)
+  })
 })
 
-function findPackages(packages: Package[], names: string[]): Package[] {
-  return packages.filter((pkg) => {
-    return names.includes(pkg.name)
-  })
-}
-
-function onUnJSPackagesSelection(packages: Package[]) {
+function onUnJSPackagesSelection(packages: InternalPackage[]) {
   const packageNames = packages.map(pkg => pkg.name)
   navigateToPackages(packageNames, 'packages[]')
 }
@@ -95,7 +97,27 @@ const selectedNpmPackages = computed(() => {
   })
 })
 
-function onNpmSelection(packages: Package[]) {
+function onNpmSelection(packages: InternalPackage[]) {
+  const packageNames = packages.map(pkg => pkg.name)
+  navigateToPackages(packageNames, 'npm-packages[]')
+}
+
+// const githubPackagesStore = useGitHubPackagesStore()
+// const queryGitHubPackages = getRoutePackages('github-packages[]')
+// watch([data, queryNpmPackages], async () => {
+//   if (!data.value.length)
+//     return
+
+//   await Promise.all(queryGitHubPackages.value?.map(name => githubPackagesStore.fetch(name, data.value)) || [])
+// })
+
+// const selectedGitHubPackages = computed(() => {
+//   return githubPackagesStore.packages.filter((pkg) => {
+//     return queryGitHubPackages.value?.includes(pkg.name)
+//   })
+// })
+
+function onGitHubSelection(packages: InternalPackage[]) {
   const packageNames = packages.map(pkg => pkg.name)
   navigateToPackages(packageNames, 'npm-packages[]')
 }
@@ -106,15 +128,21 @@ const packages = computed(() => {
   ]
 })
 const selection = computed(() => {
-  return [
+  const dedupedPackages = new Map<string, InternalPackage>()
+  const packages = [
     ...selectedUnJSPackages.value,
     ...selectedNpmPackages.value,
+    // ...selectedGitHubPackages.value,
   ]
+  packages.forEach((pkg) => {
+    dedupedPackages.set(pkg.name, pkg)
+  })
+  return [...dedupedPackages.values()]
 })
 
 const openSlideoverPackage = ref<boolean>(false)
-const slideoverPackage = ref<Package | null>(null)
-function onSelectNode(package_: Package | null) {
+const slideoverPackage = ref<InternalPackage | null>(null)
+function onSelectNode(package_: InternalPackage | null) {
   if (!package_)
     return
 
@@ -125,7 +153,7 @@ function onSelectNode(package_: Package | null) {
 function onOpenRelations(packageName: string) {
   openSlideoverPackage.value = false
 
-  const package_ = packages.value.find(pkg => pkg.name === packageName) as Package
+  const package_ = packages.value.find(pkg => pkg.name === packageName) as InternalPackage
   navigateToPackages([package_.name], 'packages[]')
 
   toast.add({
@@ -136,6 +164,7 @@ function onOpenRelations(packageName: string) {
 }
 
 const route = useRoute()
+// TODO: rename to unjs/npm/github (like source) (create a type) (explain why there is no github (because at the end, it's just npm pakcag)e
 function navigateToPackages(packageNames: string[], queryName: 'packages[]' | 'npm-packages[]') {
   navigateTo({
     query: {
@@ -163,6 +192,7 @@ useSeoMeta({
       @update:settings="openSettings = $event" @update:legend="openLegend = $event"
       @update:info="openInfo = $event"
       @update:unjs-packages="openUnJSPackages = $event" @update:npm-packages="openNpmPackages = $event"
+      @update:github-packages="openGitHubPackages = $event"
     />
 
     <ModalSettings v-model="openSettings" />
@@ -200,5 +230,10 @@ useSeoMeta({
     v-model="openNpmPackages" :unjs-packages="data"
     :selection="selectedNpmPackages"
     @update:selection="onNpmSelection($event)"
+  />
+  <!-- TODO: remove (merge with npm) and remove source github -->
+  <ModalGitHubPackages
+    v-model="openGitHubPackages" :unjs-packages="data"
+    @update:selection="onGitHubSelection($event)"
   />
 </template>

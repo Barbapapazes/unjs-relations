@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import type { Package } from '~/types/packages'
+import type { InternalPackage } from '~/types/packages'
 
 const props = defineProps<{
   modelValue: boolean
-  unjsPackages: Package[]
-  package: Package | null
+  unjsPackages: InternalPackage[]
+  package: InternalPackage | null
 }>()
 
 const emits = defineEmits<{
@@ -12,29 +12,30 @@ const emits = defineEmits<{
   'open:relations': [string]
 }>()
 
-const slideoverGitHubLink = computed(() => {
-  if (!props.package)
-    return null
+// TODO: Rework using the source
+// const slideoverGitHubLink = computed(() => {
+//   if (!props.package)
+//     return null
 
-  const isExternal = props.package.external
+//   const isExternal = props.package.external
 
-  if (isExternal)
-    return null
+//   if (isExternal)
+//     return null
 
-  return getGitHubLink(props.package.name)
-})
+//   return getGitHubLink(props.package.name)
+// })
 
-const slideoverNpmLink = computed(() => {
-  if (!props.package)
-    return null
+// const slideoverNpmLink = computed(() => {
+//   if (!props.package)
+//     return null
 
-  const isExternal = props.package.external
+//   const isExternal = props.package.external
 
-  if (!isExternal)
-    return null
+//   if (!isExternal)
+//     return null
 
-  return `https://www.npmjs.com/package/${props.package.name}`
-})
+//   return `https://www.npmjs.com/package/${props.package.name}`
+// })
 
 /**
  * Will only be used by a UnJS package
@@ -54,8 +55,8 @@ function getGitHubLink(packageName: string): string {
           {{ package.name }}
         </h2>
 
-        <UButton v-if="slideoverGitHubLink" icon="i-simple-icons-github" label="View on GitHub" :to="slideoverGitHubLink" target="_blank" variant="ghost" color="gray" />
-        <UButton v-if="slideoverNpmLink" icon="i-simple-icons-npm" label="View on npm" :to="slideoverNpmLink" target="_blank" variant="ghost" color="gray" />
+        <!-- <UButton v-if="slideoverGitHubLink" icon="i-simple-icons-github" label="View on GitHub" :to="slideoverGitHubLink" target="_blank" variant="ghost" color="gray" />
+        <UButton v-if="slideoverNpmLink" icon="i-simple-icons-npm" label="View on npm" :to="slideoverNpmLink" target="_blank" variant="ghost" color="gray" /> -->
       </template>
 
       <div class="prose dark:prose-invert">

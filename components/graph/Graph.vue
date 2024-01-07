@@ -1,16 +1,16 @@
 <script lang="ts" setup>
 import type { Data, Edge, Options } from 'vis-network'
 import { Network } from 'vis-network'
-import type { Package } from '~/types/packages'
+import type { InternalPackage } from '~/types/packages'
 import { _black, _cyan, _pink, _violet, _white, _yellow } from '#tailwind-config/theme/colors'
 
 const props = defineProps<{
-  packages: Package[]
-  selection: Package[]
+  packages: InternalPackage[]
+  selection: InternalPackage[]
 }>()
 
 const emits = defineEmits<{
-  'selectNode': [Package]
+  'selectNode': [InternalPackage]
 }>()
 
 const colorMode = useColorMode()
@@ -30,19 +30,19 @@ const selectionNames = computed<string[]>(() => {
 const container = ref<HTMLElement>()
 
 const data = computed<Data>(() => {
+  // FIXME: seclection or packages change
   /** Selection */
   const selectionNodes: Data['nodes'] = props.selection.map((select) => {
     return {
       id: select.name,
       label: select.name,
-      brokenImage: 'https://api.iconify.design/simple-icons/npm.svg',
-      image: select.external ? `https://api.iconify.design/logos/${select.name}-icon.svg` : `https://unjs.io/assets/logos/${select.title}.svg`,
+      image: select.source === 'unjs' ? `https://unjs.io/assets/logos/${select.title}.svg` : `https://api.iconify.design/simple-icons/npm.svg`,
       group: 'selection',
     }
   })
 
   // Use a condition to avoid unnecessary computation
-  const selectionChildrenPackages: Package[] = []
+  const selectionChildrenPackages: InternalPackage[] = []
   const selectionChildrenPackagesName: string[] = []
   if (showChildren.value) {
   /** Children */
@@ -141,7 +141,7 @@ const data = computed<Data>(() => {
       acc.push(pkg)
 
     return acc
-  }, [] as Package[])
+  }, [] as InternalPackage[])
 
   const edges: Data['edges'] = [
     ...dedupePackages.flatMap((pkg) => {
@@ -293,11 +293,11 @@ onMounted(() => {
   network.on('doubleClick', ({ nodes }) => {
     const package_ = [...props.packages, ...props.selection].find((pkg) => {
       return pkg.name === nodes[0]
-    }) as Package
+    }) as InternalPackage
     emits('selectNode', package_)
   })
 
-  watch(data, () => {
+  watch(data, (n, o) => {
     network.setData(data.value)
   })
 

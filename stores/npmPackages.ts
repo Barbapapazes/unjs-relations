@@ -1,12 +1,12 @@
-import type { NpmPackage, Package } from '~/types/packages'
 import { fetchNpmPackage } from '~/composables/packages'
+import type { InternalPackage } from '~/types/packages'
 
 export const useNpmPackagesStore = defineStore('npmPackages', () => {
-  const packages = ref<Package[]>([])
+  const packages = ref<InternalPackage[]>([])
 
   const toast = useToast()
 
-  async function fetch(name: string, unjsPackages: Package[], options?: { mode: 'new' }) {
+  async function fetch(name: string, unjsPackages: InternalPackage[], options?: { mode: 'new' }) {
     const cachedPackage = packages.value.find(pkg => pkg.name === name)
 
     if (cachedPackage) {
@@ -21,7 +21,7 @@ export const useNpmPackagesStore = defineStore('npmPackages', () => {
       return cachedPackage
     }
 
-    const { data, error } = await useAsyncData<{ package: NpmPackage }>(`npm:${name}`, () => fetchNpmPackage(name))
+    const { data, error } = await useAsyncData(`npm:${name}`, () => fetchNpmPackage(name))
 
     if (error.value) {
       if (error.value?.statusCode === 404) {
@@ -44,37 +44,21 @@ export const useNpmPackagesStore = defineStore('npmPackages', () => {
     if (!data.value)
       return null
 
-    const package_ = toPackage(data.value.package, unjsPackages)
-    packages.value.push(package_)
+    const internalPackage = toInternalPackage(data.value.package, 'npm', unjsPackages)
 
-    toast.add({
-      title: `'${name}' successfully added`,
-      color: 'green',
-      timeout: 3000,
-    })
+    packages.value.push(internalPackage)
 
-    return package_
+    return internalPackage
   }
 
-  function remove(name: string) {
-    const index = packages.value.findIndex(pkg => pkg.name === name)
-
-    if (index === -1)
-      return
-
-    packages.value.splice(index, 1)
-
-    toast.add({
-      title: `'${name}' removed`,
-      color: 'red',
-      timeout: 3000,
-    })
+  function set(internalPackages: InternalPackage[]) {
+    packages.value = internalPackages
   }
 
   return {
     packages,
     fetch,
-    remove,
+    set,
   }
 })
 

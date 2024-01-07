@@ -1,5 +1,5 @@
 import myzod from 'myzod'
-import type { NpmPackage, Package } from '~/types/packages'
+import type { InternalPackage, PackageJson } from '~/types/packages'
 
 export async function fetchUnJSPackages() {
   const data = await $fetch('/api/packages.json')
@@ -7,14 +7,13 @@ export async function fetchUnJSPackages() {
   const validatedData = myzod.array(myzod.object({
     name: myzod.string(),
     title: myzod.string(),
-    external: myzod.boolean(),
     description: myzod.string().or(myzod.undefined()),
     dependencies: myzod.array(myzod.string()),
     devDependencies: myzod.array(myzod.string()),
+    source: myzod.literal('unjs'),
   })).parse(data)
 
-  // TODO: we could infer Package from the validation schema
-  return validatedData as Package[]
+  return validatedData satisfies InternalPackage[]
 }
 
 export async function fetchNpmPackage(name: string) {
@@ -24,6 +23,7 @@ export async function fetchNpmPackage(name: string) {
     package: myzod.object({
       name: myzod.string(),
       version: myzod.string(),
+      private: myzod.undefined().or(myzod.boolean()),
       description: myzod.string().or(myzod.undefined()),
       dependencies: myzod.record(myzod.string()),
       devDependencies: myzod.record(myzod.string()),
@@ -34,10 +34,10 @@ export async function fetchNpmPackage(name: string) {
     }),
   }).parse(data)
 
-  return validatedData as { package: NpmPackage }
+  return validatedData satisfies { package: PackageJson }
 }
 
-export function getRoutePackages(queryName: 'packages[]' | 'npm-packages[]') {
+export function getRoutePackages(queryName: 'packages[]' | 'npm-packages[]' | 'github-packages[]') {
   const route = useRoute()
 
   const query = route.query[queryName]

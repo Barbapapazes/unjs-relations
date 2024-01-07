@@ -1,65 +1,154 @@
 <script lang="ts" setup>
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/vue'
 import { UInput } from '#components'
-import type { Package } from '~/types/packages'
+import type { InternalPackage, PackageJson } from '~/types/packages'
 
 const props = defineProps<{
   modelValue: boolean
-  unjsPackages: Package[]
-  selection: Package[]
+  unjsPackages: InternalPackage[]
+  selection: InternalPackage[]
 }>()
 
 const emits = defineEmits<{
   'update:modelValue': [boolean]
-  'update:selection': [Package[]]
+  'update:selection': [InternalPackage[]]
 }>()
 
-function close() {
-  emits('update:modelValue', false)
-}
+const toast = useToast()
 
-const selection = ref<Package[]>([...props.selection])
+const store = useNpmPackagesStore()
+
+const currentPackages = ref<InternalPackage[]>(store.packages)
+const selection = ref<InternalPackage[]>([...props.selection])
 // Used to update the selection when the parent changes
 watch(() => props.selection, () => {
   selection.value = [...props.selection]
 })
 
-const store = useNpmPackagesStore()
-
-// TODO: implement search for a package on npm using https://registry.npmjs.org/-/v1/search?text=nuxt
-const input = ref<string>('')
-const loading = ref<boolean>(false)
-async function addPackage() {
-  const packageName = input.value.trim().toLowerCase()
-
-  loading.value = true
-  const fetched = await store.fetch(packageName, props.unjsPackages, { mode: 'new' })
-  loading.value = false
-
-  if (fetched) {
-    selection.value = [...selection.value, fetched]
-    input.value = ''
-  }
+function close() {
+  emits('update:modelValue', false)
 }
 
-function removePackage(package_: Package) {
-  store.remove(package_.name)
-  selection.value = selection.value.filter(pkg => pkg.name !== package_.name)
+function removeAll() {
+  currentPackages.value = []
+  selection.value = []
 }
-
-const query = ref<string>('')
-const search = computed(() => {
-  return store.packages.filter(pkg => pkg.name.includes(query.value))
-})
 
 function clear() {
   selection.value = []
 }
 
 function validate() {
-  emits('update:selection', selection.value)
   close()
+  store.set(currentPackages.value)
+  emits('update:selection', selection.value)
 }
+
+/**
+ * Add a package from npm
+ */
+// TODO: implement search for a package on npm using https://registry.npmjs.org/-/v1/search?text=nuxt
+const npmInput = ref<string>('')
+const npmLoading = ref<boolean>(false)
+async function addNpmPackage() {
+  const packageName = npmInput.value.trim().toLowerCase()
+
+  npmLoading.value = true
+  // TODO: do not use this to avoid update chart
+  const fetched = await store.fetch(packageName, props.unjsPackages, { mode: 'new' })
+  npmLoading.value = false
+
+  if (fetched) {
+    selection.value = [...selection.value, fetched]
+    npmInput.value = ''
+  }
+}
+
+/**
+ * Add packages from npm through GitHub
+ */
+const githubInput = ref<string>('')
+const githubLoading = ref<boolean>(false)
+async function addNpmPackagesFromGitHub() {
+  const input = githubInput.value.trim().toLowerCase()
+  const isOrg = !input.includes('/')
+
+  githubLoading.value = true
+  const contents: PackageJson[] = []
+  try {
+    if (isOrg) {
+      const { repos } = await fetchGitHubRepos(input)
+
+      const data = await Promise.all(repos.map(async (repo) => {
+        const contents = await fetchPackagesFromGitHubRepo(repo.repo, repo.defaultBranch)
+        return contents
+      }))
+
+      for (const content of data)
+        contents.push(...content)
+    }
+    else {
+      const { repo } = await fetchGitHubRepo(input)
+      contents.push(...await fetchPackagesFromGitHubRepo(repo.repo, repo.defaultBranch))
+    }
+
+    for (const content of contents) {
+      const internalPackage = toInternalPackage(content, 'npm', props.unjsPackages)
+
+      addCurrentPackage(internalPackage)
+      addSelection(internalPackage)
+
+      githubInput.value = ''
+    }
+
+    toast.add({
+      title: 'Success',
+      description: `Successfully fetched ${contents.length} packages from GitHub`,
+      color: 'green',
+      timeout: 3000,
+    })
+  }
+  catch (error) {
+    toast.add({
+      title: 'Error',
+      description: 'An error occured while fetching the packages from GitHub',
+      color: 'red',
+      timeout: 3000,
+    })
+  }
+  finally {
+    githubLoading.value = false
+  }
+}
+
+function addCurrentPackage(internalPackage: InternalPackage) {
+  // Check if already exists
+  if (currentPackages.value.find(pkg => pkg.name === internalPackage.name))
+    return
+
+  currentPackages.value = [...currentPackages.value, internalPackage]
+}
+
+function addSelection(internalPackage: InternalPackage) {
+  // Check if already exists
+  if (selection.value.find(pkg => pkg.name === internalPackage.name))
+    return
+
+  selection.value = [...selection.value, internalPackage]
+}
+
+function removeInternalPackage(internalPackage: InternalPackage) {
+  currentPackages.value = currentPackages.value.filter(pkg => pkg.name !== internalPackage.name)
+  selection.value = selection.value.filter(pkg => pkg.name !== internalPackage.name)
+}
+
+/**
+ * Search inside current packages
+ */
+const query = ref<string>('')
+const search = computed(() => {
+  return currentPackages.value.filter(pkg => pkg.name.includes(query.value))
+})
 </script>
 
 <template>
@@ -74,20 +163,34 @@ function validate() {
         </div>
       </template>
 
-      <section>
-        <h3 class="text-sm">
-          Add a package from npm
-        </h3>
-
-        <form class="mt-1 flex gap-2 items-end" @submit.prevent="addPackage">
-          <UInput v-model="input" color="primary" variant="outline" placeholder="nuxt, tailwindcss, ..." :ui="{ wrapper: 'grow' }" />
-          <UButton color="primary" :disabled="!input" size="sm" type="submit" :loading="loading">
+      <div class="flex flex-col lg:flex-row gap-4">
+        <!--
+          Directly from npm
+       -->
+        <form class="grow mt-1 flex gap-2 items-end" @submit.prevent="addNpmPackage">
+          <UFormGroup class="grow" label="Add a package from npm">
+            <UInput v-model="npmInput" color="white" variant="outline" placeholder="nuxt, tailwindcss..." :ui="{ wrapper: 'grow' }" icon="i-simple-icons-npm" />
+          </UFormGroup>
+          <UButton color="primary" :disabled="!npmInput" size="sm" type="submit" :loading="npmLoading">
             Add
           </UButton>
         </form>
-      </section>
 
-      <template v-if="store.packages.length">
+        <!--
+        From GitHub to npm
+        TODO: support user and organization by trying org and if fail try user (need to push a pr to ungh)
+       -->
+        <form class="grow mt-1 flex gap-2 items-end" @submit.prevent="addNpmPackagesFromGitHub">
+          <UFormGroup class="grow" label="Add packages from GitHub">
+            <UInput v-model="githubInput" color="white" variant="outline" placeholder="nuxt/nuxt, adonisjs..." :ui="{ wrapper: 'grow' }" icon="i-simple-icons-github" />
+          </UFormGroup>
+          <UButton color="primary" size="sm" type="submit" :disabled="!githubInput" :loading="githubLoading">
+            Add
+          </UButton>
+        </form>
+      </div>
+
+      <template v-if="currentPackages.length">
         <UDivider class="my-4" />
 
         <Combobox v-model="selection" multiple by="name" as="template">
@@ -101,20 +204,20 @@ function validate() {
             <template v-else-if="search.length">
               <li v-for="item in search" :key="item.name" class="w-full flex flex-row gap-1">
                 <ComboboxOption v-slot="{ active, selected }" as="template" :value="item">
-                  <UButton :ui="{ base: 'grow' }" :class="{ 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800': active }" color="gray" variant="ghost" :active="active" tabindex="-1">
+                  <UButton :ui="{ base: 'w-[calc(100%-2.25rem)]' }" :class="{ 'text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800': active }" color="gray" variant="ghost" :active="active" tabindex="-1">
                     <template #leading>
                       <NpmPackageLogo :name="item.name" />
                     </template>
-                    <span class="grow text-start">
+                    <span class="text-start truncate w-full">
                       {{ item.name }}
                     </span>
                     <template v-if="selected" #trailing>
-                      <span class="i-heroicons-check" />
+                      <span class="i-heroicons-check shrink-0" />
                     </template>
                   </UButton>
                 </ComboboxOption>
                 <UTooltip text="Delete">
-                  <UButton color="red" variant="ghost" type="button" icon="i-heroicons-trash" @click="removePackage(item)" />
+                  <UButton color="red" variant="ghost" type="button" icon="i-heroicons-trash" @click="removeInternalPackage(item)" />
                 </UTooltip>
               </li>
             </template>
@@ -129,13 +232,18 @@ function validate() {
       </template>
 
       <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton type="button" variant="ghost" color="red" @click="clear">
-            Clear
+        <div class="flex justify-between">
+          <UButton type="button" variant="ghost" color="red" @click="removeAll">
+            Remove all
           </UButton>
-          <UButton type="button" @click="validate">
-            Validate
-          </UButton>
+          <div class="flex justify-end gap-2">
+            <UButton type="button" variant="ghost" color="red" @click="clear">
+              Clear
+            </UButton>
+            <UButton type="button" @click="validate">
+              Validate
+            </UButton>
+          </div>
         </div>
       </template>
     </UCard>
