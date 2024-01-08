@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.6.1",
+    "@antfu/eslint-config": "^2.6.2",
     "@iconify-json/ph": "^1.1.9",
     "@iconify-json/simple-icons": "^1.1.86",
     "@nuxt/ui": "^2.11.1",
