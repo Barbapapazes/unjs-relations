@@ -44,7 +44,7 @@ const { metaSymbol } = useShortcuts()
           <kbd>{{ metaSymbol }}</kbd> + <kbd>u</kbd> toggle the UnJS manage packages
         </li>
         <li>
-          <kbd>{{ metaSymbol }}</kbd> + <kbd>n</kbd> toggle the NPM manage packages
+          <kbd>{{ metaSymbol }}</kbd> + <kbd>y</kbd> toggle the NPM manage packages
         </li>
       </ul>
     </p>

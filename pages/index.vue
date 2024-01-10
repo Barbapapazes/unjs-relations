@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { LocationQuery } from 'vue-router'
 import type { InternalPackage } from '~/types/packages'
 
 // We can't fetch on server since this will use the API endpoint and not the prerender file.
@@ -26,7 +27,6 @@ const openSettings = ref<boolean>(false)
 const openLegend = ref<boolean>(false)
 const openUnJSPackages = ref<boolean>(false)
 const openNpmPackages = ref<boolean>(false)
-const openGitHubPackages = ref<boolean>(false)
 const openInfo = ref<boolean>(false)
 
 defineShortcuts({
@@ -55,14 +55,9 @@ defineShortcuts({
       openUnJSPackages.value = !openUnJSPackages.value
     },
   },
-  meta_n: {
+  meta_y: {
     handler() {
       openNpmPackages.value = !openNpmPackages.value
-    },
-  },
-  meta_g: {
-    handler() {
-      openGitHubPackages.value = !openGitHubPackages.value
     },
   },
 })
@@ -102,26 +97,6 @@ function onNpmSelection(packages: InternalPackage[]) {
   navigateToPackages(packageNames, 'npm-packages[]')
 }
 
-// const githubPackagesStore = useGitHubPackagesStore()
-// const queryGitHubPackages = getRoutePackages('github-packages[]')
-// watch([data, queryNpmPackages], async () => {
-//   if (!data.value.length)
-//     return
-
-//   await Promise.all(queryGitHubPackages.value?.map(name => githubPackagesStore.fetch(name, data.value)) || [])
-// })
-
-// const selectedGitHubPackages = computed(() => {
-//   return githubPackagesStore.packages.filter((pkg) => {
-//     return queryGitHubPackages.value?.includes(pkg.name)
-//   })
-// })
-
-function onGitHubSelection(packages: InternalPackage[]) {
-  const packageNames = packages.map(pkg => pkg.name)
-  navigateToPackages(packageNames, 'npm-packages[]')
-}
-
 const packages = computed(() => {
   return [
     ...data.value!,
@@ -132,7 +107,6 @@ const selection = computed(() => {
   const packages = [
     ...selectedUnJSPackages.value,
     ...selectedNpmPackages.value,
-    // ...selectedGitHubPackages.value,
   ]
   packages.forEach((pkg) => {
     dedupedPackages.set(pkg.name, pkg)
@@ -154,7 +128,7 @@ function onOpenRelations(packageName: string) {
   openSlideoverPackage.value = false
 
   const package_ = packages.value.find(pkg => pkg.name === packageName) as InternalPackage
-  navigateToPackages([package_.name], 'packages[]')
+  navigateToPackages([package_.name], 'packages[]', true)
 
   toast.add({
     title: `Showing relations for ${package_.name}`,
@@ -164,11 +138,11 @@ function onOpenRelations(packageName: string) {
 }
 
 const route = useRoute()
-// TODO: rename to unjs/npm/github (like source) (create a type) (explain why there is no github (because at the end, it's just npm pakcag)e
-function navigateToPackages(packageNames: string[], queryName: 'packages[]' | 'npm-packages[]') {
+function navigateToPackages(packageNames: string[], queryName: 'packages[]' | 'npm-packages[]', replace = false) {
+  const currentNavigation = replace ? {} satisfies LocationQuery : route.query
   navigateTo({
     query: {
-      ...route.query,
+      ...currentNavigation,
       // We set packages to an empty string if there are no packages to avoid to use all packages
       [queryName]: packageNames.length ? packageNames : 'null',
     },
@@ -192,7 +166,6 @@ useSeoMeta({
       @update:settings="openSettings = $event" @update:legend="openLegend = $event"
       @update:info="openInfo = $event"
       @update:unjs-packages="openUnJSPackages = $event" @update:npm-packages="openNpmPackages = $event"
-      @update:github-packages="openGitHubPackages = $event"
     />
 
     <ModalSettings v-model="openSettings" />
@@ -230,10 +203,5 @@ useSeoMeta({
     v-model="openNpmPackages" :unjs-packages="data"
     :selection="selectedNpmPackages"
     @update:selection="onNpmSelection($event)"
-  />
-  <!-- TODO: remove (merge with npm) and remove source github -->
-  <ModalGitHubPackages
-    v-model="openGitHubPackages" :unjs-packages="data"
-    @update:selection="onGitHubSelection($event)"
   />
 </template>

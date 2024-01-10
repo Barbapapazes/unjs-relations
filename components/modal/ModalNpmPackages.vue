@@ -54,7 +54,6 @@ async function addNpmPackage() {
   const packageName = npmInput.value.trim().toLowerCase()
 
   npmLoading.value = true
-  // TODO: do not use this to avoid update chart
   const fetched = await store.fetch(packageName, props.unjsPackages, { mode: 'new' })
   npmLoading.value = false
 
@@ -111,7 +110,7 @@ async function addNpmPackagesFromGitHub() {
   catch (error) {
     toast.add({
       title: 'Error',
-      description: 'An error occured while fetching the packages from GitHub',
+      description: 'An error occurred while fetching the packages from GitHub',
       color: 'red',
       timeout: 3000,
     })
@@ -177,11 +176,10 @@ const search = computed(() => {
         </form>
 
         <!--
-        From GitHub to npm
-        TODO: support user and organization by trying org and if fail try user (need to push a pr to ungh)
+        From GitHub organization to npm
        -->
         <form class="grow mt-1 flex gap-2 items-end" @submit.prevent="addNpmPackagesFromGitHub">
-          <UFormGroup class="grow" label="Add packages from GitHub">
+          <UFormGroup class="grow" label="Add packages from GitHub (repo or organization)">
             <UInput v-model="githubInput" color="white" variant="outline" placeholder="nuxt/nuxt, adonisjs..." :ui="{ wrapper: 'grow' }" icon="i-simple-icons-github" />
           </UFormGroup>
           <UButton color="primary" size="sm" type="submit" :disabled="!githubInput" :loading="githubLoading">

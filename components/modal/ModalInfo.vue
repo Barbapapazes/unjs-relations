@@ -13,6 +13,6 @@ const emits = defineEmits<{
     :model-value="modelValue" title="Info"
     @update:model-value="emits('update:modelValue', $event)"
   >
-    <AppInfo />
+    <Info />
   </AppModal>
 </template>

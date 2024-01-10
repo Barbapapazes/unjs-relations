@@ -12,31 +12,6 @@ const emits = defineEmits<{
   'open:relations': [string]
 }>()
 
-// TODO: Rework using the source
-// const slideoverGitHubLink = computed(() => {
-//   if (!props.package)
-//     return null
-
-//   const isExternal = props.package.external
-
-//   if (isExternal)
-//     return null
-
-//   return getGitHubLink(props.package.name)
-// })
-
-// const slideoverNpmLink = computed(() => {
-//   if (!props.package)
-//     return null
-
-//   const isExternal = props.package.external
-
-//   if (!isExternal)
-//     return null
-
-//   return `https://www.npmjs.com/package/${props.package.name}`
-// })
-
 /**
  * Will only be used by a UnJS package
  */
@@ -49,14 +24,18 @@ function getGitHubLink(packageName: string): string {
 
 <template>
   <USlideover :model-value="modelValue" @update:model-value="emits('update:modelValue', $event)">
-    <UCard class="flex flex-col flex-1" :ui="{ body: { base: 'flex-1 overflow-y-auto' }, ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800', header: { base: 'flex justify-between items-center' } }">
+    <UCard v-if="package" class="h-screen flex flex-col flex-1" :ui="{ body: { base: 'flex-1 overflow-y-auto' }, ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800', header: { base: 'flex justify-between items-center' } }">
       <template #header>
-        <h2 v-if="package" class="text-xl font-bold">
+        <h2 class="text-xl font-bold">
           {{ package.name }}
         </h2>
 
-        <!-- <UButton v-if="slideoverGitHubLink" icon="i-simple-icons-github" label="View on GitHub" :to="slideoverGitHubLink" target="_blank" variant="ghost" color="gray" />
-        <UButton v-if="slideoverNpmLink" icon="i-simple-icons-npm" label="View on npm" :to="slideoverNpmLink" target="_blank" variant="ghost" color="gray" /> -->
+        <UButton v-if="package.source === 'unjs'" aria-label="View on UnJS" :to="`https://unjs.io/${package.name}?utm_source=unjs-relations.barbapapazes.dev`" target="_blank" variant="ghost" color="gray">
+          <template #leading>
+            <UAvatar src="https://unjs.io/favicon.svg" alt="UnJS Logo" size="xs" :ui="{ rounded: 'rounded-sm' }" />
+          </template>
+        </UButton>
+        <UButton v-if="package.source === 'npm'" icon="i-simple-icons-npm" aria-label="View on npm" :to="`https://npmjs.com/package/${package.name}`" target="_blank" variant="ghost" color="gray" />
       </template>
 
       <div class="prose dark:prose-invert">

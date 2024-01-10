@@ -30,7 +30,6 @@ const selectionNames = computed<string[]>(() => {
 const container = ref<HTMLElement>()
 
 const data = computed<Data>(() => {
-  // FIXME: seclection or packages change
   /** Selection */
   const selectionNodes: Data['nodes'] = props.selection.map((select) => {
     return {
@@ -297,7 +296,7 @@ onMounted(() => {
     emits('selectNode', package_)
   })
 
-  watch(data, (n, o) => {
+  watch(data, () => {
     network.setData(data.value)
   })
 

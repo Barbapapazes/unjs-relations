@@ -1,4 +1,4 @@
-export type InternalPackageSource = 'npm' | 'github' | 'unjs'
+export type InternalPackageSource = 'npm' | 'unjs'
 
 export interface InternalPackage {
   name: string
