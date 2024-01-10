@@ -5,25 +5,30 @@ export default defineAppConfig({
     button: {
       base: 'transition ease-in',
       color: {
-        white: {
-          solid: 'shadow-none',
+        gray: {
+          solid: 'shadow-none bg-gray-300/20 hover:bg-gray-300/40 dark:bg-gray-700/40 dark:hover:bg-gray-700/50',
         },
-      },
-      variant: {
-        solid: 'shadow-none text-gray-900',
       },
     },
     input: {
+      base: 'transition ease-in',
+      color: {
+        gray: {
+          outline: 'shadow-none bg-gray-300/20 hover:bg-gray-300/40 dark:bg-gray-700/40 dark:hover:bg-gray-700/50',
+        },
+      },
       variant: {
         outline: 'shadow-none',
       },
     },
     select: {
+      base: 'transition ease-in',
       color: {
-        white: {
-          outline: 'shadow-none',
-        },
+        gray: { outline: 'shadow-none bg-gray-300/20 hover:bg-gray-300/40 dark:bg-gray-700/40 dark:hover:bg-gray-700/50' },
       },
+    },
+    card: {
+      base: 'transition ease-in duration-150',
     },
   },
 })

@@ -1,19 +1,25 @@
 <script lang="ts" setup>
 import type { Data, Edge, Options } from 'vis-network'
 import { Network } from 'vis-network'
-import type { Package } from '~/types/packages'
-import { _cyan, _pink, _violet, _yellow } from '#tailwind-config/theme/colors'
-import type { Settings } from '~/types/settings'
+import type { InternalPackage } from '~/types/packages'
+import { _black, _cyan, _pink, _violet, _white, _yellow } from '#tailwind-config/theme/colors'
 
 const props = defineProps<{
-  packages: Package[]
-  selection: Package[]
-  settings: Settings
+  packages: InternalPackage[]
+  selection: InternalPackage[]
 }>()
 
 const emits = defineEmits<{
-  'selectNode': [Package]
+  'selectNode': [InternalPackage]
 }>()
+
+const colorMode = useColorMode()
+
+const {
+  showDependencies,
+  showDevDependencies,
+  showChildren,
+} = getSettings()
 
 const selectionNames = computed<string[]>(() => {
   return props.selection.map((select) => {
@@ -29,21 +35,20 @@ const data = computed<Data>(() => {
     return {
       id: select.name,
       label: select.name,
-      brokenImage: 'https://api.iconify.design/simple-icons/npm.svg',
-      image: select.external ? `https://api.iconify.design/logos/${select.name}-icon.svg` : `https://unjs.io/assets/logos/${select.title}.svg`,
+      image: select.source === 'unjs' ? `https://unjs.io/assets/logos/${select.title}.svg` : `https://api.iconify.design/simple-icons/npm.svg`,
       group: 'selection',
     }
   })
 
   // Use a condition to avoid unnecessary computation
-  const selectionChildrenPackages: Package[] = []
+  const selectionChildrenPackages: InternalPackage[] = []
   const selectionChildrenPackagesName: string[] = []
-  if (props.settings.children) {
+  if (showChildren.value) {
   /** Children */
     selectionChildrenPackages.push(...props.packages
     // Filter out packages that have not selected packages as dependencies or devDependencies
       .filter((pkg) => {
-        if (props.settings.dependencies) {
+        if (showDependencies.value) {
           // Check if current package use any of the selected packages
           const hasUsedBy = pkg.dependencies.some((dep) => {
             return selectionNames.value.includes(dep)
@@ -53,7 +58,7 @@ const data = computed<Data>(() => {
             return true
         }
 
-        if (props.settings.devDependencies) {
+        if (showDependencies.value) {
           // Check if current package use any of the selected packages
           const hasUsedBy = pkg.devDependencies.some((dep) => {
             return selectionNames.value.includes(dep)
@@ -90,10 +95,10 @@ const data = computed<Data>(() => {
     // Add current package for selection children packages
     deps.push(pkg.name)
 
-    if (props.settings.dependencies)
+    if (showDependencies.value)
       deps.push(...pkg.dependencies)
 
-    if (props.settings.devDependencies)
+    if (showDevDependencies.value)
       deps.push(...pkg.devDependencies)
 
     return deps
@@ -135,20 +140,22 @@ const data = computed<Data>(() => {
       acc.push(pkg)
 
     return acc
-  }, [] as Package[])
+  }, [] as InternalPackage[])
 
   const edges: Data['edges'] = [
     ...dedupePackages.flatMap((pkg) => {
       const data: Edge[] = []
 
-      if (props.settings.dependencies) {
+      if (showDependencies.value) {
+        const color = colorMode.preference === 'light' ? _pink[300] : _pink[900]
+        const highlight = colorMode.preference === 'light' ? _pink[500] : _pink[800]
         data.push(...pkg.dependencies.map((dep) => {
           return {
             from: pkg.name,
             to: dep,
             color: {
-              color: _pink[300],
-              highlight: _pink[500],
+              color,
+              highlight,
             },
             relation: 'dependencies',
             arrows: 'to',
@@ -156,14 +163,16 @@ const data = computed<Data>(() => {
         }))
       }
 
-      if (props.settings.devDependencies) {
+      if (showDevDependencies.value) {
+        const color = colorMode.preference === 'light' ? _violet[300] : _violet[900]
+        const highlight = colorMode.preference === 'light' ? _violet[500] : _violet[800]
         data.push(...pkg.devDependencies.map((dep) => {
           return {
             from: pkg.name,
             to: dep,
             color: {
-              color: _violet[300],
-              highlight: _violet[500],
+              color,
+              highlight,
             },
             relation: 'devDependencies',
             arrows: 'to',
@@ -182,7 +191,7 @@ const data = computed<Data>(() => {
 })
 
 onMounted(() => {
-  const options: Options = {
+  const generalOptions: Options = {
     nodes: {
       shape: 'circularImage',
       imagePadding: 6,
@@ -209,8 +218,14 @@ onMounted(() => {
         iterations: 200,
       },
     },
+  }
+  const lightOptions: Options = {
     groups: {
       selection: {
+        font: {
+          color: _black,
+          face: 'Nunito',
+        },
         color: {
           background: _yellow[300],
           border: _yellow[500],
@@ -221,6 +236,10 @@ onMounted(() => {
         },
       },
       dependencies: {
+        font: {
+          color: _black,
+          face: 'Nunito',
+        },
         color: {
           background: _cyan[50],
           border: _cyan[300],
@@ -232,18 +251,62 @@ onMounted(() => {
       },
     },
   }
+  const darkOptions: Options = {
+    groups: {
+      selection: {
+        font: {
+          color: _white,
+          face: 'Nunito',
+        },
+        color: {
+          background: _yellow[900],
+          border: _yellow[600],
+          highlight: {
+            background: _yellow[700],
+            border: _yellow[500],
+          },
+        },
+      },
+      dependencies: {
+        font: {
+          color: _white,
+          face: 'Nunito',
+        },
+        color: {
+          background: _cyan[900],
+          border: _cyan[600],
+          highlight: {
+            background: _cyan[700],
+            border: _cyan[500],
+          },
+        },
+      },
+    },
+  }
 
-  const network = new Network(container.value!, data.value, options)
+  const network = new Network(container.value!, data.value, {
+    ...generalOptions,
+    ...colorMode.value === 'light' ? lightOptions : darkOptions,
+  })
 
   network.on('doubleClick', ({ nodes }) => {
     const package_ = [...props.packages, ...props.selection].find((pkg) => {
       return pkg.name === nodes[0]
-    }) as Package
+    }) as InternalPackage
     emits('selectNode', package_)
   })
 
   watch(data, () => {
     network.setData(data.value)
+  })
+
+  watch(() => colorMode.preference, () => {
+    network.setOptions({
+      ...generalOptions,
+      ...colorMode.preference === 'light' ? lightOptions : darkOptions,
+    })
+
+    network.redraw()
   })
 })
 </script>

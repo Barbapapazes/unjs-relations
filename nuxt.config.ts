@@ -1,28 +1,15 @@
 export default defineNuxtConfig({
-  app: {
-    head: {
-      title: 'UnJS Relations',
-      meta: [{
-        name: 'description',
-        content: 'Visualize relations between UnJS packages and the ecosystem.',
-      }],
-      link: [{
-        rel: 'icon',
-        href: '/favicon.svg',
-      }],
-    },
-  },
-
-  modules: ['@nuxt/ui', '@vueuse/nuxt', '@nuxtjs/google-fonts', '@nuxtjs/fontaine'],
+  modules: ['@nuxt/ui', '@vueuse/nuxt', '@nuxtjs/google-fonts', '@nuxtjs/fontaine', '@pinia/nuxt'],
 
   ui: {
-    icons: ['simple-icons', 'ph'],
+    icons: ['simple-icons', 'heroicons'],
   },
 
+  css: [
+    '~/assets/app.css',
+  ],
+
   routeRules: {
-    '/': {
-      ssr: false,
-    },
     '/api/packages.json': {
       cache: {
         maxAge: 60 * 60 * 24 * 7, // 1 week
@@ -62,7 +49,7 @@ export default defineNuxtConfig({
   },
 
   colorMode: {
-    preference: 'light',
+    preference: 'dark',
   },
 
   devtools: { enabled: true },
